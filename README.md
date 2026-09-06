@@ -1,32 +1,32 @@
 <div align="center">
 
-<img src="docs/images/logo.svg" alt="OryxOS — Agent Harness OS" width="420">
+<img src="docs/images/logo.svg" alt="FourFeetCat（四脚猫）— Agent Harness OS" width="430">
 
-# OryxOS
+# FourFeetCat（四脚猫）
 
 **企业 Agent 操作系统（Agent Harness OS）**
 
 用一句自然语言发布一个任务 → 底座把它拆解 → 组织一支 Agent 团队 → 多个 Agent 分工协作 → 交付一个结果。
 
-让每一家公司，都能用自然语言跑起来自己的 Agent。
+让每一家公司，都能用自然语言跑起来自己的 Agent。不做三脚猫——四脚稳稳着地，稳得住一队 Agent。
 
 [![Status](https://img.shields.io/badge/status-阶段一·单机运行时内核-blue)]()
 [![JDK](https://img.shields.io/badge/JDK-21-orange)]()
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.x-6DB33F?logo=springboot&logoColor=white)]()
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
-[![Docker](https://img.shields.io/badge/GHCR-oryx--labs%2Foryxos-2496ED?logo=docker&logoColor=white)]()
+[![Docker](https://img.shields.io/badge/GHCR-oryx--labs%2Ffourfeetcat-2496ED?logo=docker&logoColor=white)]()
 
 **自然语言(md) + Memory + Tool + MCP(Connector) + Skill + 知识库 + Notify = 一个 Agent**
 
 一个目录定义一个 Agent，一个底座运行一群 Agent，私有部署，数据不出域。
 
-[为什么需要 OryxOS](#为什么需要-oryxos) · [架构](#架构) · [快速开始](#快速开始) · [模块说明](#模块说明) · [路线图](#路线图)
+[为什么需要 FourFeetCat](#为什么需要-fourfeetcat) · [架构](#架构) · [快速开始](#快速开始) · [模块说明](#模块说明) · [路线图](#路线图)
 
 </div>
 
 ---
 
-## 为什么需要 OryxOS
+## 为什么需要 FourFeetCat
 
 每家公司都有该交给 Agent 的活，但 Agent 大多还停在 demo，卡在四道门槛上：
 
@@ -35,11 +35,11 @@
 3. **执行是黑盒**——没审计、没白名单、没人审批，企业不敢上生产
 4. **跑一个容易、跑一群难**——没有人把「一群 Agent 的操作系统」这一层交给你
 
-OryxOS 一次拆掉这四道门槛：**自然语言定义、私有部署、全链路审计加沙箱、为一整队 Agent 准备的生命周期与治理**。
+FourFeetCat 一次拆掉这四道门槛：**自然语言定义、私有部署、全链路审计加沙箱、为一整队 Agent 准备的生命周期与治理**。
 
-更深一层的判断是：让 Agent 在生产环境可靠工作，瓶颈通常不在模型本身，而在 Agent 的运行环境——能不能拿到对的上下文、有没有受控的工具、调用能不能被隔离和审计、跨节点协作时消息能不能不丢不重地送达。OryxOS 做的不是又一个 Agent，而是让一群 Agent 可靠运行和协同的**底座本身**。
+更深一层的判断是：让 Agent 在生产环境可靠工作，瓶颈通常不在模型本身，而在 Agent 的运行环境——能不能拿到对的上下文、有没有受控的工具、调用能不能被隔离和审计、跨节点协作时消息能不能不丢不重地送达。FourFeetCat 做的不是又一个 Agent，而是让一群 Agent 可靠运行和协同的**底座本身**。
 
-> **与相邻概念的边界**：框架（LangChain / Spring AI）给你代码、要你自己搭运行环境；编排平台（Dify / Coze）给你流程、跑在运行时之上；OryxOS 给你**运行时本身**——一个让 Agent 能常驻、可治理、可审计地跑起来的底座。它复用框架（LLM 调用层基于 Spring AI Alibaba），托住编排平台（可作其后端运行时），自己专注守在运行时这一层。
+> **与相邻概念的边界**：框架（LangChain / Spring AI）给你代码、要你自己搭运行环境；编排平台（Dify / Coze）给你流程、跑在运行时之上；FourFeetCat 给你**运行时本身**——一个让 Agent 能常驻、可治理、可审计地跑起来的底座。它复用框架（LLM 调用层基于 Spring AI Alibaba），托住编排平台（可作其后端运行时），自己专注守在运行时这一层。
 
 ## 核心特性
 
@@ -55,13 +55,13 @@ OryxOS 一次拆掉这四道门槛：**自然语言定义、私有部署、全�
 
 ## 架构
 
-OryxOS 是一个 Spring Boot 单体应用，三个触发入口（CLI 人推、REST API 人推、定时任务钟推）最终都汇入同一个引擎，`ReActLoop` 不感知消息从哪个入口来：
+FourFeetCat 是一个 Spring Boot 单体应用，三个触发入口（CLI 人推、REST API 人推、定时任务钟推）最终都汇入同一个引擎，`ReActLoop` 不感知消息从哪个入口来：
 
-![OryxOS 整体架构](docs/images/architecture.svg)
+![FourFeetCat 整体架构](docs/images/architecture.svg)
 
 *五层自上而下：接入层（三个触发入口）→ 引擎层（`AgentService` 统一入口 + `ReActLoop` 调度 `PromptBuilder`/`ToolExecutor`）→ 能力层（Provider / Memory / Tool）→ 基础层（Agent 目录、存储、配置密钥）；虚线为应用边界之外的外部依赖（LLM APIs、MCP Servers）。*
 
-- **引擎**（`ReActLoop`）：Reason → Act → Observe 循环——LLM 思考是否调工具、调哪个，OryxOS 执行后回填结果，直到给出最终响应或达到最大迭代次数（默认 10）。核心循环自己实现，约数十行 Java，不依赖 Spring AI 的 Agent 抽象
+- **引擎**（`ReActLoop`）：Reason → Act → Observe 循环——LLM 思考是否调工具、调哪个，FourFeetCat 执行后回填结果，直到给出最终响应或达到最大迭代次数（默认 10）。核心循环自己实现，约数十行 Java，不依赖 Spring AI 的 Agent 抽象
 - **能力**：Provider（对接 DeepSeek、通义、Kimi、智谱、Anthropic、OpenAI 等，运行时切换无锁定）、Memory（会话记忆 + 长期记忆，三档可插拔后端）、Tool（内置文件/Shell/HTTP/通知/记忆九个工具 + MCP 接入）
 - **基础**：`AGENT.md` frontmatter 派生 `Profile`，Skill 经渐进式披露按需加载；`tool_invocations` / `llm_calls` 审计表 day one 落库
 
@@ -76,19 +76,19 @@ OryxOS 是一个 Spring Boot 单体应用，三个触发入口（CLI 人推、RE
 
 ```bash
 # 1. 初始化工作区（幂等，不覆盖已有文件）
-oryxos init
+fourfeetcat init
 
 # 2. 注入模型凭证（不明文写进配置）
 export DEEPSEEK_API_KEY=sk-...
 
 # 3. 开始对话
-oryxos chat
+fourfeetcat chat
 ```
 
 首次运行后，一个 Agent 就是一个目录：
 
 ```
-.oryxos/agents/my-agent/AGENT.md    # frontmatter = 运行配置，正文 = 任务指令
+.fourfeetcat/agents/my-agent/AGENT.md    # frontmatter = 运行配置，正文 = 任务指令
 ```
 
 ```markdown
@@ -109,9 +109,9 @@ tools:
 ### 三种运行模式
 
 ```bash
-oryxos chat                 # 交互对话（开发调试）
-oryxos serve --port 8080    # REST API 服务（业务系统 HTTP 集成）
-oryxos gateway              # 守护进程（多 Channel 常驻 + 定时任务）
+fourfeetcat chat                 # 交互对话（开发调试）
+fourfeetcat serve --port 8080    # REST API 服务（业务系统 HTTP 集成）
+fourfeetcat gateway              # 守护进程（多 Channel 常驻 + 定时任务）
 ```
 
 三种模式共享同一份 Agent 配置和 Session 存储。业务系统集成：
@@ -134,11 +134,11 @@ curl -X POST http://localhost:8080/api/v1/sessions/<id>/messages \
 
 ```bash
 docker run -d \
-  -e ORYXOS_ROOT=/data/.oryxos \
+  -e FOURFEETCAT_ROOT=/data/.fourfeetcat \
   -e DEEPSEEK_API_KEY=sk-... \
-  -v oryxos-data:/data \
+  -v fourfeetcat-data:/data \
   -p 8080:8080 \
-  ghcr.io/oryx-labs/oryxos:latest
+  ghcr.io/oryx-labs/fourfeetcat:latest
 ```
 
 镜像内不跑 Maven，直接 COPY 胖 JAR 进 JRE 基础镜像；全部状态在 `/data` 卷；非 root（uid 1000）运行，内置 `/api/v1/health` 健康检查。
@@ -146,9 +146,9 @@ docker run -d \
 ### 从源码构建
 
 ```bash
-git clone <repo-url> && cd OryxOS
+git clone <repo-url> && cd FourFeetCat
 mvn clean package
-java -jar oryxos-boot/target/*.jar chat
+java -jar fourfeetcat-boot/target/*.jar chat
 ```
 
 > **扩展现有能力**：零代码 = 写 Agent 目录 + 复用社区现成 MCP server（主推）；轻代码 = 用任何语言自写 MCP server 配进 `mcp_servers.yaml`；重代码 = Java `@Tool` 注解 Spring Bean。能用低门槛就不用高门槛。
@@ -159,28 +159,28 @@ Maven 多模块工程（14 个），骨架先立 9 个基础模块，其余随�
 
 | 模块 | 职责 |
 |---|---|
-| `oryxos-core` | 核心抽象：`ReActLoop`、`PromptBuilder`、`ToolExecutor`、`AgentService`（三触发源统一入口）、`AgentScheduler`、Agent 目录加载、channel / knowledge 契约 |
-| `oryxos-provider` | 能力一：`ProviderService`、Function Calling 适配、provider name → ChatModel 显式映射 |
-| `oryxos-memory` | 能力三：`MemoryService` 统一门面、长期记忆三档后端、`save_memory` / `recall_memory` |
-| `oryxos-knowledge` | 知识库：本地后端、解析/切分/向量化流水线、双路召回 + RRF 融合检索 |
-| `oryxos-tool` | 能力四（三合一）：内置 Tool、MCP Client、`ToolRegistry`、`Sandbox` 接口 + `WhitelistSandbox`、通知适配器 |
-| `oryxos-web` | 能力五：`WebServer`、REST Controller、OpenAPI 文档 |
-| `oryxos-channel-cli` | CLI Channel（`oryxos chat`） |
-| `oryxos-channel-feishu` / `-wecom` / `-dingtalk` | 三大 IM 入站渠道：长连接收消息、@ 判定剥离、出站过沙箱、自动重连（契约在 core，依赖倒置） |
-| `oryxos-persona` | 人格模板库（copy-in）：12 个内置预设 + 自定义 CRUD |
-| `oryxos-storage` | 持久化：SQLite / PostgreSQL + Flyway、Session / 审计 / 定时任务 Repository |
-| `oryxos-cli` | Picocli 命令行入口、`ConfigLoader` |
-| `oryxos-boot` | Spring Boot 启动模块、自动配置、依赖聚合 |
+| `fourfeetcat-core` | 核心抽象：`ReActLoop`、`PromptBuilder`、`ToolExecutor`、`AgentService`（三触发源统一入口）、`AgentScheduler`、Agent 目录加载、channel / knowledge 契约 |
+| `fourfeetcat-provider` | 能力一：`ProviderService`、Function Calling 适配、provider name → ChatModel 显式映射 |
+| `fourfeetcat-memory` | 能力三：`MemoryService` 统一门面、长期记忆三档后端、`save_memory` / `recall_memory` |
+| `fourfeetcat-knowledge` | 知识库：本地后端、解析/切分/向量化流水线、双路召回 + RRF 融合检索 |
+| `fourfeetcat-tool` | 能力四（三合一）：内置 Tool、MCP Client、`ToolRegistry`、`Sandbox` 接口 + `WhitelistSandbox`、通知适配器 |
+| `fourfeetcat-web` | 能力五：`WebServer`、REST Controller、OpenAPI 文档 |
+| `fourfeetcat-channel-cli` | CLI Channel（`fourfeetcat chat`） |
+| `fourfeetcat-channel-feishu` / `-wecom` / `-dingtalk` | 三大 IM 入站渠道：长连接收消息、@ 判定剥离、出站过沙箱、自动重连（契约在 core，依赖倒置） |
+| `fourfeetcat-persona` | 人格模板库（copy-in）：12 个内置预设 + 自定义 CRUD |
+| `fourfeetcat-storage` | 持久化：SQLite / PostgreSQL + Flyway、Session / 审计 / 定时任务 Repository |
+| `fourfeetcat-cli` | Picocli 命令行入口、`ConfigLoader` |
+| `fourfeetcat-boot` | Spring Boot 启动模块、自动配置、依赖聚合 |
 
 ## 核心概念
 
 | 术语 | 一句话 |
 |---|---|
-| **Agent** | 一个目录 `.oryxos/agents/<name>/`：`AGENT.md`（frontmatter 配置 + 正文指令）+ 可选 `skills/` 软连接、`scripts/` |
+| **Agent** | 一个目录 `.fourfeetcat/agents/<name>/`：`AGENT.md`（frontmatter 配置 + 正文指令）+ 可选 `skills/` 软连接、`scripts/` |
 | **Profile** | 由 `AGENT.md` frontmatter 派生的运行时配置对象，决定 Agent 怎么跑 |
 | **Provider** | LLM API 抽象，Agent 不感知调的是哪家模型 |
-| **Skill** | 公共能力实体存 `.oryxos/skills/`，Agent 经本地 `skills/` 软连接绑定；prompt 只注入元数据，正文按需读取 |
-| **Tool** | 可调用的外部能力，统一 `OryxTool` 抽象，内置九个 + MCP / `@Tool` 扩展 |
+| **Skill** | 公共能力实体存 `.fourfeetcat/skills/`，Agent 经本地 `skills/` 软连接绑定；prompt 只注入元数据，正文按需读取 |
+| **Tool** | 可调用的外部能力，统一 `CatTool` 抽象，内置九个 + MCP / `@Tool` 扩展 |
 | **Memory** | 会话记忆 + 长期记忆（`MEMORY.md`），跨对话记住偏好 |
 | **Channel** | 消息入口（CLI / 飞书 / 企微 / 钉钉） |
 | **Sandbox** | 工具执行的白名单校验（文件路径 / Shell 命令 / HTTP 域名 / SMTP 端点） |
@@ -189,7 +189,7 @@ Maven 多模块工程（14 个），骨架先立 9 个基础模块，其余随�
 
 | 文档 | 内容 |
 |---|---|
-| [`docs/oryxos.md`](docs/oryxos.md) | 项目定位与愿景 |
+| [`docs/fourfeetcat.md`](docs/fourfeetcat.md) | 项目定位与愿景 |
 | [`docs/DemandAnalysis.md`](docs/DemandAnalysis.md) | 需求文档（What：功能 / 非功能需求、验收标准） |
 | [`docs/TechnicalSolution.md`](docs/TechnicalSolution.md) | 技术方案（How：架构、模块、数据模型、关键决策） |
 | [`docs/IndustryResearch.md`](docs/IndustryResearch.md) | 业界调研（Agent OS 格局、Java 生态缺位、定位论证） |
@@ -207,7 +207,7 @@ Maven 多模块工程（14 个），骨架先立 9 个基础模块，其余随�
 
 ## 社区
 
-OryxOS 由 [oryx-labs](docs/oryx-labs.md) 社区维护——一个 AI coding 驱动的 AI 探索社区，聚焦 AI infra、Agent、AI 应用、AI 工具四个方向，纯粹由爱好驱动。欢迎加入，找几个同样起劲的人，做点有趣的东西。
+FourFeetCat 由 [oryx-labs](docs/oryx-labs.md) 社区维护——一个 AI coding 驱动的 AI 探索社区，聚焦 AI infra、Agent、AI 应用、AI 工具四个方向，纯粹由爱好驱动。欢迎加入，找几个同样起劲的人，做点有趣的东西。
 
 ## License
 

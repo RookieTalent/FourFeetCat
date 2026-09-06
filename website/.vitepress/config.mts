@@ -1,14 +1,17 @@
 import { defineConfig } from 'vitepress'
 
-const REPO = 'https://github.com/RookieTalent/OryxOS'
+const REPO = 'https://github.com/RookieTalent/FourFeetCat'
+// 部署在 GitHub Pages 项目站时用环境变量注入 base（/FourFeetCat/），本地 dev 用 /
+const base = process.env.BASE_URL || '/'
 
 export default defineConfig({
+  base,
   lang: 'zh-CN',
-  title: 'OryxOS',
-  description: '企业 Agent 操作系统（Agent Harness OS）——一个目录定义一个 Agent，一个底座运行一群 Agent，私有部署，数据不出域。',
+  title: 'FourFeetCat',
+  description: '四脚猫 FourFeetCat——企业 Agent 操作系统（Agent Harness OS）：一个目录定义一个 Agent，一个底座运行一群 Agent，私有部署，数据不出域。',
   head: [
-    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/images/logo-icon.svg' }],
-    ['meta', { name: 'theme-color', content: '#0F172A' }]
+    ['link', { rel: 'icon', type: 'image/svg+xml', href: `${base}images/logo-icon.svg` }],
+    ['meta', { name: 'theme-color', content: '#FFFFFF' }]
   ],
   locales: {
     // 中文为默认站点根
@@ -36,7 +39,7 @@ export default defineConfig({
       lang: 'en-US',
       label: 'English',
       link: '/en/',
-      description: 'The Agent Harness OS for enterprises — one directory defines an Agent, one harness runs them all. Private deployment, data never leaves your domain.',
+      description: 'FourFeetCat — the Agent Harness OS for enterprises. One directory defines an Agent, one harness runs them all. Private deployment, data never leaves your domain.',
       themeConfig: {
         nav: [
           { text: 'GitHub', link: REPO },

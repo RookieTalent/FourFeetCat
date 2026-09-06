@@ -1,32 +1,32 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 200" font-family="'PingFang SC','Segoe UI','Helvetica Neue',Arial,sans-serif">
-  <defs>
-    <linearGradient id="oryx-horn" x1="0" y1="1" x2="0" y2="0">
-      <stop offset="0" stop-color="#4F46E5"/>
-      <stop offset="1" stop-color="#8B5CF6"/>
-    </linearGradient>
-    <linearGradient id="oryx-head" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#6366F1"/>
-      <stop offset="1" stop-color="#4F46E5"/>
-    </linearGradient>
-  </defs>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 224" font-family="'PingFang SC','Segoe UI','Helvetica Neue',Arial,sans-serif">
 
-  <!-- ═══════════ 标志：Oryx 长角羚（几何极简） ═══════════ -->
-  <g transform="translate(18,10)">
-    <!-- 左角：自额顶向上、微外倾的长直角 -->
-    <path d="M 76 98 L 46 10" stroke="url(#oryx-horn)" stroke-width="11" stroke-linecap="round" fill="none"/>
-    <!-- 右角 -->
-    <path d="M 124 98 L 154 10" stroke="url(#oryx-horn)" stroke-width="11" stroke-linecap="round" fill="none"/>
-
-    <!-- 头面：自额顶双角基向鼻尖收束的锋形 -->
-    <path d="M 76 98 L 124 98 L 100 176 Z"
-          fill="url(#oryx-head)" stroke="url(#oryx-head)" stroke-width="8" stroke-linejoin="round"/>
-
-    <!-- 双目 -->
-    <circle cx="89" cy="121" r="4.5" fill="#FFFFFF"/>
-    <circle cx="111" cy="121" r="4.5" fill="#FFFFFF"/>
+  <!-- ═══════════ 标志：蓝白猫（端坐正视） ═══════════ -->
+  <g transform="translate(16,12)">
+    <!-- 耳 -->
+    <path d="M 92 46 L 78 10 L 112 40 Z" fill="#7CA4E0" stroke="#2E56A8" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M 128 46 L 142 10 L 108 40 Z" fill="#7CA4E0" stroke="#2E56A8" stroke-width="4" stroke-linejoin="round"/>
+    <!-- 身体 -->
+    <path d="M 70 120 C 54 142 56 158 68 168 L 72 182 C 84 188 136 188 148 182 L 152 168
+             C 164 158 166 142 150 120 C 132 130 88 130 70 120 Z"
+          fill="#FFFFFF" stroke="#2E56A8" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M 96 186 L 96 172 M 124 186 L 124 172" stroke="#2E56A8" stroke-width="3" stroke-linecap="round"/>
+    <!-- 头 -->
+    <circle cx="110" cy="88" r="44" fill="#FFFFFF" stroke="#2E56A8" stroke-width="5"/>
+    <!-- 头罩 -->
+    <path d="M 67 96 A 43 43 0 0 1 153 96 C 144 103 128 106 110 106 C 92 106 76 103 67 96 Z" fill="#7CA4E0"/>
+    <!-- 眼 -->
+    <circle cx="86" cy="114" r="5" fill="#20355E"/>
+    <circle cx="134" cy="114" r="5" fill="#20355E"/>
+    <!-- 鼻与嘴 -->
+    <path d="M 106 128 L 114 128 L 110 134 Z" fill="#E8A0B4" stroke="#E8A0B4" stroke-width="1" stroke-linejoin="round"/>
+    <path d="M 110 134 L 110 142 M 110 142 L 104 148 M 110 142 L 116 148" stroke="#C9C2B8" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+    <!-- 胡须 -->
+    <path d="M 74 118 L 48 114 M 74 126 L 48 130 M 146 118 L 172 114 M 146 126 L 172 130" stroke="#B9C8E0" stroke-width="2.5" stroke-linecap="round"/>
+    <!-- 基线 -->
+    <line x1="34" y1="190" x2="186" y2="190" stroke="#2E56A8" stroke-width="5" stroke-linecap="round"/>
   </g>
 
   <!-- ═══════════ 字标 ═══════════ -->
-  <text x="212" y="112" font-size="66" font-weight="700" fill="#0F172A" letter-spacing="1">Oryx<tspan fill="#6366F1" font-weight="800">OS</tspan></text>
-  <text x="215" y="152" font-size="17" font-weight="600" fill="#64748B" letter-spacing="7">AGENT HARNESS OS</text>
+  <text x="238" y="118" font-size="60" font-weight="700" fill="#1E293B" letter-spacing="0.5">FourFeet<tspan fill="#3D6FD6" font-weight="800">Cat</tspan></text>
+  <text x="243" y="158" font-size="15" font-weight="600" fill="#5B6B84" letter-spacing="3">四脚猫 · Agent Harness OS</text>
 </svg>

@@ -1,6 +1,6 @@
-# OryxOS 项目宪章（Constitution）
+# FourFeetCat 项目宪章（Constitution）
 
-> 本宪章定义 OryxOS 开发的非协商原则（non-negotiable principles），提炼自《OryxOS 需求文档》第 3 章设计目标与《OryxOS 技术方案》第 1.1 节关键技术决策。所有 spec、plan、tasks、implement 及社区贡献代码都必须遵守。
+> 本宪章定义 FourFeetCat 开发的非协商原则（non-negotiable principles），提炼自《FourFeetCat 需求文档》第 3 章设计目标与《FourFeetCat 技术方案》第 1.1 节关键技术决策。所有 spec、plan、tasks、implement 及社区贡献代码都必须遵守。
 >
 > **修订规则**：本宪章写一次定下来，整个主体开发期间不改。如果中途发现某条原则不对，停下来由项目方重新讨论修订；**不允许 AI agent 自行修改本宪章**。
 
@@ -20,23 +20,23 @@
 
 ## 原则三：自实现 ReAct loop + Spring AI 只用一半
 
-- ReAct 核心循环由 OryxOS 自己实现（`ReActLoop` + `PromptBuilder` + `ToolExecutor`），不依赖 Spring AI 的 Agent 抽象
+- ReAct 核心循环由 FourFeetCat 自己实现（`ReActLoop` + `PromptBuilder` + `ToolExecutor`），不依赖 Spring AI 的 Agent 抽象
 - Spring AI 只用三件事：Provider 抽象、协议转换、`@Tool` 注解的 JSON Schema 生成
-- **禁用 Spring AI 的自动 tool 执行**——否则 tool 会被调两次；tool 的实际调度完全由 OryxOS 自己的 `ReActLoop` + `ToolExecutor` 控制。**这是最容易被写错的一条**
+- **禁用 Spring AI 的自动 tool 执行**——否则 tool 会被调两次；tool 的实际调度完全由 FourFeetCat 自己的 `ReActLoop` + `ToolExecutor` 控制。**这是最容易被写错的一条**
 - 多 Provider 并存用 provider name 到 `ChatModel` 的**显式映射**，不靠类型扫描
 
 ## 原则四：一个目录 = 一个 Agent，且不是 Tool
 
 - `AGENT.md` 正文由 `ContextLoader` 注入 system prompt（与 Bootstrap 文件同层）；frontmatter 由 `AgentLoader.deriveProfile()` 派生成 `Profile`
 - **一个 Agent 目录不是一个可执行 Tool**——它的子资源（Skill 正文、参考、脚本）经底座既有 `read_file` / `shell` 按需取用，不新造机制、不进 `ToolRegistry`
-- Skill 公共实体存 `.oryxos/skills/<name>/`；Agent 通过自身 `skills/<name>` 相对软连接选择可见集合，**软连接集合是唯一绑定真相源**，不使用 frontmatter `skills:` 字段
+- Skill 公共实体存 `.fourfeetcat/skills/<name>/`；Agent 通过自身 `skills/<name>` 相对软连接选择可见集合，**软连接集合是唯一绑定真相源**，不使用 frontmatter `skills:` 字段
 - 渐进式披露：prompt 只注入已绑定 Skill 的 name / description / 本地路径，正文与附属资源按需读取
 
 ## 原则五：接口先行
 
 - `Sandbox`、`NotifyChannelAdapter`、`LongTermMemoryStore`、`InboundChannelAdapter`、`ScheduledTaskStore` 等抽象接口不携带任何实现细节（用最重的实现去反向套接口，也应能干净套入）
 - 扩展只新增实现类，不改接口、不改调用方
-- 契约在 core、实现在外围模块（依赖倒置），如 `oryxos-core/channel/` 与 Channel 适配器模块、`oryxos-core/knowledge/` 与 `oryxos-knowledge`
+- 契约在 core、实现在外围模块（依赖倒置），如 `fourfeetcat-core/channel/` 与 Channel 适配器模块、`fourfeetcat-core/knowledge/` 与 `fourfeetcat-knowledge`
 
 ## 原则六：Plugin Tool 三档接入
 
@@ -45,7 +45,7 @@
 3. 重代码：Java `@Tool` 注解 Spring Bean
 
 - 选择原则：能用方式一就不用方式二，能用方式二就不用方式三
-- 内置 Tool 与 MCP Tool 统一包装成 `OryxTool` 注册到 `ToolRegistry`，ReAct 循环不感知 Tool 来源
+- 内置 Tool 与 MCP Tool 统一包装成 `CatTool` 注册到 `ToolRegistry`，ReAct 循环不感知 Tool 来源
 
 ## 原则七：SQLite + Memory 三档后端 + 审计 day one
 
