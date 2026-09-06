@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" font-family="'PingFang SC','Segoe UI','Helvetica Neue',Arial,sans-serif">
+  <defs>
+    <linearGradient id="oryx-horn" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#4F46E5"/>
+      <stop offset="1" stop-color="#8B5CF6"/>
+    </linearGradient>
+    <linearGradient id="oryx-head" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#6366F1"/>
+      <stop offset="1" stop-color="#4F46E5"/>
+    </linearGradient>
+  </defs>
+
+  <!-- ═══════════ 标志：Oryx 长角羚（几何极简 · 方形图标版） ═══════════ -->
+  <g transform="translate(10,12)">
+    <!-- 左角：自额顶向上、微外倾的长直角 -->
+    <path d="M 76 98 L 46 10" stroke="url(#oryx-horn)" stroke-width="11" stroke-linecap="round" fill="none"/>
+    <!-- 右角 -->
+    <path d="M 124 98 L 154 10" stroke="url(#oryx-horn)" stroke-width="11" stroke-linecap="round" fill="none"/>
+
+    <!-- 头面：自额顶双角基向鼻尖收束的锋形 -->
+    <path d="M 76 98 L 124 98 L 100 176 Z"
+          fill="url(#oryx-head)" stroke="url(#oryx-head)" stroke-width="8" stroke-linejoin="round"/>
+
+    <!-- 双目 -->
+    <circle cx="89" cy="121" r="4.5" fill="#FFFFFF"/>
+    <circle cx="111" cy="121" r="4.5" fill="#FFFFFF"/>
+  </g>
+</svg>

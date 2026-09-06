@@ -1,0 +1,65 @@
+:root {
+  --oryx-bg: #0F172A;
+  --oryx-bg-soft: #131C33;
+  --oryx-indigo: #6366F1;
+  --oryx-violet: #8B5CF6;
+  --oryx-text: #E2E8F0;
+  --oryx-muted: #94A3B8;
+  --oryx-border: rgba(148, 163, 184, 0.16);
+  --oryx-card: rgba(30, 41, 59, 0.55);
+  --oryx-font: 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  --oryx-mono: ui-monospace, 'JetBrains Mono', 'Cascadia Code', Consolas, monospace;
+}
+
+/* 首页整页覆盖：进入 Home 时去掉默认主题的页面留白，全幅铺开 */
+.oryx-home {
+  min-height: 100vh;
+  background: var(--oryx-bg);
+  color: var(--oryx-text);
+  font-family: var(--oryx-font);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 全局滚动条融入深色 */
+.oryx-home ::selection {
+  background: rgba(99, 102, 241, 0.4);
+}
+
+/* 通用区块容器 */
+.oryx-section {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 88px 24px 0;
+}
+
+.oryx-kicker {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--oryx-indigo);
+  margin-bottom: 12px;
+}
+
+.oryx-h2 {
+  font-size: 30px;
+  font-weight: 800;
+  color: #F8FAFC;
+  letter-spacing: 0.5px;
+}
+
+.oryx-lead {
+  margin-top: 14px;
+  font-size: 16px;
+  line-height: 1.8;
+  color: var(--oryx-muted);
+  max-width: 760px;
+}
+
+/* 渐变文字 */
+.oryx-gradient-text {
+  background: linear-gradient(120deg, #A5B4FC 10%, #8B5CF6 60%, #C4B5FD 90%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}

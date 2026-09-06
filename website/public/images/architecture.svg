@@ -1,0 +1,164 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1070" viewBox="0 0 1000 1070" font-family="'PingFang SC','Microsoft YaHei','Noto Sans SC','Segoe UI',sans-serif">
+  <defs>
+    <marker id="ai" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+      <path d="M0,0 L8,4.5 L0,9 z" fill="#6366F1"/>
+    </marker>
+    <marker id="ag" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+      <path d="M0,0 L8,4.5 L0,9 z" fill="#16A34A"/>
+    </marker>
+    <marker id="ab" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+      <path d="M0,0 L8,4.5 L0,9 z" fill="#3B82F6"/>
+    </marker>
+    <marker id="ao" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+      <path d="M0,0 L8,4.5 L0,9 z" fill="#F97316"/>
+    </marker>
+  </defs>
+
+  <!-- 背景 -->
+  <rect width="1000" height="1070" fill="#FFFFFF"/>
+
+  <!-- 标题 -->
+  <text x="500" y="48" text-anchor="middle" font-size="22" font-weight="700" fill="#0F172A">OryxOS 整体架构</text>
+  <text x="500" y="76" text-anchor="middle" font-size="13" fill="#64748B">三个触发入口汇入同一个 AgentService —— ReAct 引擎调度三大能力，基础层支撑，外部依赖在应用边界之外</text>
+
+  <!-- ═══════════ 分层背景带 ═══════════ -->
+  <rect x="120" y="100" width="760" height="140" rx="14" fill="#EEF2FF" stroke="#C7D2FE" stroke-width="1.5"/>
+  <rect x="120" y="268" width="760" height="242" rx="14" fill="#F0FDF4" stroke="#BBF7D0" stroke-width="1.5"/>
+  <rect x="120" y="538" width="760" height="170" rx="14" fill="#EFF6FF" stroke="#BFDBFE" stroke-width="1.5"/>
+  <rect x="120" y="736" width="760" height="170" rx="14" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1.5"/>
+  <rect x="120" y="935" width="760" height="95" rx="14" fill="#FFF7ED" stroke="#FED7AA" stroke-width="1.5" stroke-dasharray="7,5"/>
+
+  <!-- 分层标签（左侧竖排） -->
+  <text transform="translate(98,170) rotate(-90)" text-anchor="middle" font-size="13" font-weight="700" fill="#4F46E5" letter-spacing="2">接入层</text>
+  <text transform="translate(98,389) rotate(-90)" text-anchor="middle" font-size="13" font-weight="700" fill="#15803D" letter-spacing="2">引擎层</text>
+  <text transform="translate(98,623) rotate(-90)" text-anchor="middle" font-size="13" font-weight="700" fill="#1D4ED8" letter-spacing="2">能力层</text>
+  <text transform="translate(98,821) rotate(-90)" text-anchor="middle" font-size="13" font-weight="700" fill="#475569" letter-spacing="2">基础层</text>
+  <text transform="translate(98,982) rotate(-90)" text-anchor="middle" font-size="13" font-weight="700" fill="#C2410C" letter-spacing="2">外部依赖</text>
+
+  <!-- ═══════════ 接入层：三个触发入口 ═══════════ -->
+  <rect x="140" y="132" width="220" height="90" rx="10" fill="#FFFFFF" stroke="#C7D2FE" stroke-width="1.5"/>
+  <rect x="312" y="141" width="40" height="20" rx="10" fill="#DBEAFE" stroke="#93C5FD" stroke-width="1"/>
+  <text x="332" y="155" text-anchor="middle" font-size="11" fill="#1E40AF">人推</text>
+  <text x="156" y="168" font-size="15" font-weight="700" fill="#312E81">CLI Channel</text>
+  <text x="156" y="191" font-size="12" font-family="ui-monospace,'JetBrains Mono',Consolas,monospace" fill="#4338CA">oryxos chat</text>
+  <text x="156" y="212" font-size="12" fill="#64748B">交互式多轮对话</text>
+
+  <rect x="390" y="132" width="220" height="90" rx="10" fill="#FFFFFF" stroke="#C7D2FE" stroke-width="1.5"/>
+  <rect x="562" y="141" width="40" height="20" rx="10" fill="#DBEAFE" stroke="#93C5FD" stroke-width="1"/>
+  <text x="582" y="155" text-anchor="middle" font-size="11" fill="#1E40AF">人推</text>
+  <text x="406" y="168" font-size="15" font-weight="700" fill="#312E81">Web Service</text>
+  <text x="406" y="191" font-size="12" font-family="ui-monospace,'JetBrains Mono',Consolas,monospace" fill="#4338CA">oryxos serve :8080</text>
+  <text x="406" y="212" font-size="12" fill="#64748B">REST API · 业务系统集成</text>
+
+  <rect x="640" y="132" width="220" height="90" rx="10" fill="#FFFFFF" stroke="#C7D2FE" stroke-width="1.5"/>
+  <rect x="812" y="141" width="40" height="20" rx="10" fill="#FEF3C7" stroke="#FCD34D" stroke-width="1"/>
+  <text x="832" y="155" text-anchor="middle" font-size="11" fill="#92400E">钟推</text>
+  <text x="656" y="168" font-size="15" font-weight="700" fill="#312E81">AgentScheduler</text>
+  <text x="656" y="191" font-size="12" font-family="ui-monospace,'JetBrains Mono',Consolas,monospace" fill="#4338CA">cron 表达式到点触发</text>
+  <text x="656" y="212" font-size="12" fill="#64748B">定时任务 · 免人工发起</text>
+
+  <!-- 触发入口 → AgentService -->
+  <path d="M250,222 L250,256 L560,256 L560,293" fill="none" stroke="#6366F1" stroke-width="2" marker-end="url(#ai)"/>
+  <path d="M500,222 L500,293" fill="none" stroke="#6366F1" stroke-width="2" marker-end="url(#ai)"/>
+  <path d="M750,222 L750,256 L640,256 L640,293" fill="none" stroke="#6366F1" stroke-width="2" marker-end="url(#ai)"/>
+
+  <!-- ═══════════ 引擎层 ═══════════ -->
+  <rect x="350" y="295" width="300" height="55" rx="10" fill="#16A34A" stroke="#15803D" stroke-width="1.5"/>
+  <text x="500" y="317" text-anchor="middle" font-size="15" font-weight="700" fill="#FFFFFF">AgentService.process()</text>
+  <text x="500" y="339" text-anchor="middle" font-size="11.5" fill="#DCFCE7">三种触发源的统一入口 · 人推与钟推同一条链路</text>
+
+  <path d="M500,350 L500,382" fill="none" stroke="#16A34A" stroke-width="2" marker-end="url(#ag)"/>
+
+  <rect x="140" y="385" width="220" height="110" rx="10" fill="#FFFFFF" stroke="#BBF7D0" stroke-width="1.5"/>
+  <text x="156" y="417" font-size="15" font-weight="700" fill="#14532D">PromptBuilder</text>
+  <text x="156" y="443" font-size="12" fill="#475569">组装每轮 LLM Prompt</text>
+  <text x="156" y="464" font-size="12" fill="#475569">system · 记忆 · 历史</text>
+  <text x="156" y="485" font-size="12" fill="#475569">Tool 列表 · Function Calling</text>
+
+  <rect x="390" y="385" width="220" height="110" rx="10" fill="#FFFFFF" stroke="#BBF7D0" stroke-width="1.5"/>
+  <text x="406" y="417" font-size="15" font-weight="700" fill="#14532D">ReActLoop</text>
+  <text x="406" y="443" font-size="12" fill="#475569">Reason → Act → Observe</text>
+  <text x="406" y="464" font-size="12" fill="#475569">自实现 · 不套外部框架</text>
+  <text x="406" y="485" font-size="12" fill="#475569">MAX_ITERATIONS 默认 10</text>
+
+  <rect x="640" y="385" width="220" height="110" rx="10" fill="#FFFFFF" stroke="#BBF7D0" stroke-width="1.5"/>
+  <text x="656" y="417" font-size="15" font-weight="700" fill="#14532D">ToolExecutor</text>
+  <text x="656" y="443" font-size="12" fill="#475569">执行 Tool 调用与回填</text>
+  <text x="656" y="464" font-size="12" fill="#475569">Sandbox 白名单校验</text>
+  <text x="656" y="485" font-size="12" fill="#475569">写 tool_invocations 审计</text>
+
+  <!-- ReActLoop 驱动 PromptBuilder / ToolExecutor -->
+  <path d="M390,440 L364,440" fill="none" stroke="#16A34A" stroke-width="2" marker-end="url(#ag)"/>
+  <path d="M610,440 L636,440" fill="none" stroke="#16A34A" stroke-width="2" marker-end="url(#ag)"/>
+
+  <!-- ═══════════ 能力层 ═══════════ -->
+  <path d="M250,495 L250,566" fill="none" stroke="#3B82F6" stroke-width="2" marker-end="url(#ab)"/>
+  <path d="M500,495 L500,566" fill="none" stroke="#3B82F6" stroke-width="2" marker-end="url(#ab)"/>
+  <path d="M750,495 L750,566" fill="none" stroke="#3B82F6" stroke-width="2" marker-end="url(#ab)"/>
+  <text x="258" y="527" font-size="10.5" fill="#64748B">每轮注入上下文</text>
+  <text x="508" y="527" font-size="10.5" fill="#64748B">每轮调用 LLM</text>
+  <text x="758" y="527" font-size="10.5" fill="#64748B">执行工具调用</text>
+
+  <rect x="140" y="570" width="220" height="118" rx="10" fill="#FFFFFF" stroke="#BFDBFE" stroke-width="1.5"/>
+  <rect x="292" y="581" width="52" height="20" rx="10" fill="#DBEAFE" stroke="#93C5FD" stroke-width="1"/>
+  <text x="318" y="595" text-anchor="middle" font-size="10.5" fill="#1E40AF">能力三</text>
+  <text x="156" y="604" font-size="15" font-weight="700" fill="#1E3A8A">MemoryService</text>
+  <text x="156" y="632" font-size="12" fill="#475569">会话记忆 + 长期记忆</text>
+  <text x="156" y="655" font-size="12" fill="#475569">MEMORY.md · 三档后端</text>
+  <text x="156" y="678" font-size="11.5" font-family="ui-monospace,'JetBrains Mono',Consolas,monospace" fill="#475569">save / recall_memory</text>
+
+  <rect x="390" y="570" width="220" height="118" rx="10" fill="#FFFFFF" stroke="#BFDBFE" stroke-width="1.5"/>
+  <rect x="542" y="581" width="52" height="20" rx="10" fill="#DBEAFE" stroke="#93C5FD" stroke-width="1"/>
+  <text x="568" y="595" text-anchor="middle" font-size="10.5" fill="#1E40AF">能力一</text>
+  <text x="406" y="604" font-size="15" font-weight="700" fill="#1E3A8A">ProviderService</text>
+  <text x="406" y="632" font-size="12" fill="#475569">provider→ChatModel 显式映射</text>
+  <text x="406" y="655" font-size="12" fill="#475569">Function Calling 适配</text>
+  <text x="406" y="678" font-size="12" fill="#475569">fallback 备援</text>
+
+  <rect x="640" y="570" width="220" height="118" rx="10" fill="#FFFFFF" stroke="#BFDBFE" stroke-width="1.5"/>
+  <rect x="792" y="581" width="52" height="20" rx="10" fill="#DBEAFE" stroke="#93C5FD" stroke-width="1"/>
+  <text x="818" y="595" text-anchor="middle" font-size="10.5" fill="#1E40AF">能力四</text>
+  <text x="656" y="604" font-size="15" font-weight="700" fill="#1E3A8A">Tool 体系</text>
+  <text x="656" y="632" font-size="12" fill="#475569">内置 Tool × 9 · MCP Client</text>
+  <text x="656" y="655" font-size="12" fill="#475569">ToolRegistry · OryxTool</text>
+  <text x="656" y="678" font-size="12" fill="#475569">沙箱白名单 · NotifyTools</text>
+
+  <!-- ═══════════ 基础层 ═══════════ -->
+  <text x="864" y="756" text-anchor="end" font-size="11" font-style="italic" fill="#94A3B8">为以上各层提供支撑</text>
+
+  <rect x="140" y="766" width="220" height="120" rx="10" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.5"/>
+  <text x="156" y="798" font-size="15" font-weight="700" fill="#0F172A">Agent 目录与上下文</text>
+  <text x="156" y="826" font-size="12" fill="#475569">AGENT.md → Profile 派生</text>
+  <text x="156" y="850" font-size="12" fill="#475569">Skill 软连接 · 渐进披露</text>
+  <text x="156" y="874" font-size="12" fill="#475569">Bootstrap · ContextLoader</text>
+
+  <rect x="390" y="766" width="220" height="120" rx="10" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.5"/>
+  <text x="406" y="798" font-size="15" font-weight="700" fill="#0F172A">持久化存储</text>
+  <text x="406" y="826" font-size="12" fill="#475569">SQLite / PostgreSQL · Flyway</text>
+  <text x="406" y="850" font-size="12" fill="#475569">sessions · 审计 · 定时任务</text>
+  <text x="406" y="874" font-size="12" fill="#475569">MEMORY.md · 文件系统</text>
+
+  <rect x="640" y="766" width="220" height="120" rx="10" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.5"/>
+  <text x="656" y="798" font-size="15" font-weight="700" fill="#0F172A">配置与密钥</text>
+  <text x="656" y="826" font-size="12" fill="#475569">ConfigLoader · ${ENV_VAR}</text>
+  <text x="656" y="850" font-size="12" fill="#475569">AES-GCM 凭证加密</text>
+  <text x="656" y="874" font-size="12" fill="#475569">Sandbox 白名单配置</text>
+
+  <!-- ═══════════ 外部依赖（虚线 · 穿过基础层箱体间隙） ═══════════ -->
+  <path d="M500,688 L500,712 L375,712 L375,958" fill="none" stroke="#F97316" stroke-width="2" stroke-dasharray="6,5" marker-end="url(#ao)"/>
+  <path d="M750,688 L750,712 L625,712 L625,958" fill="none" stroke="#F97316" stroke-width="2" stroke-dasharray="6,5" marker-end="url(#ao)"/>
+
+  <rect x="260" y="962" width="230" height="54" rx="10" fill="#FFFFFF" stroke="#FED7AA" stroke-width="1.5"/>
+  <text x="375" y="984" text-anchor="middle" font-size="14" font-weight="700" fill="#9A3412">LLM Provider APIs</text>
+  <text x="375" y="1004" text-anchor="middle" font-size="10.5" fill="#78716C">DeepSeek · 通义 · Kimi · 智谱 · OpenAI…</text>
+
+  <rect x="510" y="962" width="230" height="54" rx="10" fill="#FFFFFF" stroke="#FED7AA" stroke-width="1.5"/>
+  <text x="625" y="984" text-anchor="middle" font-size="14" font-weight="700" fill="#9A3412">MCP Servers</text>
+  <text x="625" y="1004" text-anchor="middle" font-size="10.5" fill="#78716C">任意语言 · mcp_servers.yaml</text>
+
+  <!-- 图例 -->
+  <line x1="140" y1="1050" x2="168" y2="1050" stroke="#64748B" stroke-width="2"/>
+  <text x="176" y="1054" font-size="11" fill="#64748B">实线 · 进程内调用</text>
+  <line x1="300" y1="1050" x2="328" y2="1050" stroke="#F97316" stroke-width="2" stroke-dasharray="6,4"/>
+  <text x="336" y="1054" font-size="11" fill="#64748B">虚线 · 外部依赖（应用边界之外）</text>
+</svg>

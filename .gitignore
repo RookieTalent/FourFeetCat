@@ -1,0 +1,21 @@
+# Node / VitePress
+node_modules/
+website/.vitepress/dist/
+website/.vitepress/cache/
+website/.vitepress/*.log
+
+# OryxOS 运行时工作区（含密钥与本地数据，绝不入库）
+.oryxos/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# 日志与临时文件
+*.log
+tmp/
