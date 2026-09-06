@@ -1,29 +1,22 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" font-family="'PingFang SC','Segoe UI',Arial,sans-serif">
-  <!-- ═══ 手绘简笔猫脸 ═══
-       白圆脸 · 圆头猫耳（两笔粗线）· 线稿风，不刺不鼠 -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <!-- ═══ 爪印猫 ═══
+       一枚蓝色爪印：四只脚趾下压、与圆掌垫几乎相切，紧凑一坨。
+       掌垫即猫头——无耳、无眼，只有粉鼻 + ω 笑嘴。
+       远看是爪印，近看那只猫在笑；「四脚猫」三字尽在一图。 -->
 
-  <!-- 耳（粗线圆头收尖；先画，白脸覆其根部 → 只见两笔圆头耳） -->
-  <g stroke="#2E56A8" stroke-width="8" stroke-linecap="round" fill="none">
-    <path d="M 78 104 L 52 32 M 52 32 L 98 78"/>
-    <path d="M 122 104 L 148 32 M 148 32 L 102 78"/>
+  <!-- 四只脚趾 -->
+  <g transform="translate(0,-17)">
+    <ellipse cx="40" cy="88" rx="17" ry="18" fill="#3D6FD6"/>
+    <ellipse cx="78" cy="58" rx="17" ry="18" fill="#3D6FD6"/>
+    <ellipse cx="122" cy="58" rx="17" ry="18" fill="#3D6FD6"/>
+    <ellipse cx="160" cy="88" rx="17" ry="18" fill="#3D6FD6"/>
+
+    <!-- 圆掌垫 = 猫头 -->
+    <circle cx="100" cy="138" r="56" fill="#3D6FD6"/>
+
+    <!-- 粉鼻 + ω 笑嘴 -->
+    <ellipse cx="100" cy="126" rx="8" ry="6.5" fill="#F0A6B5"/>
+    <path d="M 100 136 Q 93 148 83 143 M 100 136 Q 107 148 117 143"
+          stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" fill="none"/>
   </g>
-
-  <!-- 白圆脸 -->
-  <circle cx="100" cy="132" r="58" fill="#FFFFFF" stroke="#2E56A8" stroke-width="6"/>
-
-  <!-- 眼（憨憨两点） -->
-  <circle cx="76" cy="158" r="9" fill="#20355E"/>
-  <circle cx="124" cy="158" r="9" fill="#20355E"/>
-  <circle cx="73" cy="154.5" r="3" fill="#FFFFFF"/>
-  <circle cx="121" cy="154.5" r="3" fill="#FFFFFF"/>
-
-  <!-- 鼻 -->
-  <path d="M 94 178 L 106 178 L 100 186 Z" fill="#F0A6B5" stroke-linejoin="round"/>
-  <!-- 嘴 -->
-  <path d="M 100 184 Q 96 190 90 188 M 100 184 Q 104 190 110 188"
-        stroke="#9AA7BD" stroke-width="2.5" stroke-linecap="round" fill="none"/>
-
-  <!-- 胡须（两笔极淡） -->
-  <path d="M 52 160 L 26 156 M 148 160 L 174 156"
-        stroke="#A9C6EF" stroke-width="2.5" stroke-linecap="round" fill="none"/>
 </svg>
