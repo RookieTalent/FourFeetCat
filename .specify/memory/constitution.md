@@ -1,65 +1,160 @@
-# FourFeetCat 项目宪章（Constitution）
+<!--
+## Sync Impact Report
 
-> 本宪章定义 FourFeetCat 开发的非协商原则（non-negotiable principles），提炼自《FourFeetCat 需求文档》第 3 章设计目标与《FourFeetCat 技术方案》第 1.1 节关键技术决策。所有 spec、plan、tasks、implement 及社区贡献代码都必须遵守。
->
-> **修订规则**：本宪章写一次定下来，整个主体开发期间不改。如果中途发现某条原则不对，停下来由项目方重新讨论修订；**不允许 AI agent 自行修改本宪章**。
+- Version change: 1.1.0 (九条原则，文件已被 Spec Kit 初始化重置为空模板) → 2.0.0
+- Version bump rationale: MAJOR —— 原则集由九条重构为八条，且编号重排（Spring AI 两件事：旧四→新二；
+  审计表 Day One：旧六→新五；"一个目录 = 一个 Agent"保持原则四不变）。编号重排使
+  docs/AiProgrammingGuide.md 中两处旧编号交叉引用（§263 "constitution 原则四"、§361
+  "constitution 原则六"）失效，属向后不兼容变更。
+- 保留不变（从上一版 v1.1.0 及 CLAUDE.md 继承）：原则四编号与语义（TechnicalSolution.md
+  多处交叉引用"宪法原则四"= 一个 Agent 目录不是可执行 Tool）；模块结构可按需演进的 v1.1.0 修订精神。
+- Added sections: 「技术与架构约束」「开发工作流」（对应模板 SECTION_2/SECTION_3）
+- Removed sections: 无（原文件为未填充模板）
+- Follow-up TODOs:
+  - TODO(DOCS_ALIGNMENT): docs/AiProgrammingGuide.md §263 与 §361 的 constitution 原则编号
+    仍指向旧版九条宪法的编号（四→现为二，六→现为五），需单独一次 docs 修订对齐，并按铁律
+    同步检查 README/官网是否受影响。
+-->
 
----
+# FourFeetCat（四脚猫）Constitution
 
-## 原则一：JDK 21 + Spring Boot 3.x 单体应用
+本宪法是 FourFeetCat —— 面向企业场景的 Distributed AI Agent OS（Java 21 + Spring Boot 3）
+—— 的最高开发准则。所有特性规格（spec）、实施计划（plan）与代码 MUST 遵守本宪法；
+与 CLAUDE.md 中「不可违背的原则」同源，冲突时以本宪法为准。
 
-- Maven 多模块工程，模块清单以技术方案第 10 章为准（14 个模块）
-- 骨架先立 9 个基础模块（core / provider / memory / tool / web / storage / cli / boot / channel-cli），persona、knowledge、channel-feishu、channel-wecom、channel-dingtalk 随对应能力演进而增补
-- 单二进制 fat JAR 部署，`java -jar` 启动；GraalVM Native Image 放扩展阶段
+## Core Principles
 
-## 原则二：五大核心能力优先
+### 原则一：自实现 ReAct Loop
 
-- 核心阶段交付的是 Agent OS 的**运行时内核**：对接 LLM、ReAct 循环、Memory、Tool 体系、Web Service
-- 企业级治理层（多租户、SSO、完整审计、Tool Policy）放扩展阶段，但架构上预留扩展点
-- 分阶段克制：每次架构升级用真实使用数据证明其必要性
+`ReActLoop` MUST 自行实现，不得使用 Spring AI 的 Agent 抽象（如 `ChatClient.prompt().call()`
+的自动工具执行）。核心循环约数十行 Java，完整掌握 Agent 工作机制，保留未来定制循环行为的空间。
+理由：底座的核心价值在于对 Agent 工作机制的完全掌控，而非依赖框架黑盒。
 
-## 原则三：自实现 ReAct loop + Spring AI 只用一半
+### 原则二：Spring AI 只用两件事 ⚠️
 
-- ReAct 核心循环由 FourFeetCat 自己实现（`ReActLoop` + `PromptBuilder` + `ToolExecutor`），不依赖 Spring AI 的 Agent 抽象
-- Spring AI 只用三件事：Provider 抽象、协议转换、`@Tool` 注解的 JSON Schema 生成
-- **禁用 Spring AI 的自动 tool 执行**——否则 tool 会被调两次；tool 的实际调度完全由 FourFeetCat 自己的 `ReActLoop` + `ToolExecutor` 控制。**这是最容易被写错的一条**
-- 多 Provider 并存用 provider name 到 `ChatModel` 的**显式映射**，不靠类型扫描
+Spring AI 在本项目中 MUST 只承担：
 
-## 原则四：一个目录 = 一个 Agent，且不是 Tool
+1. LLM Provider 协议转换（OpenAI / Anthropic / Gemini 等格式差异由它吸收）；
+2. `@Tool` 注解的 JSON Schema 生成。
 
-- `AGENT.md` 正文由 `ContextLoader` 注入 system prompt（与 Bootstrap 文件同层）；frontmatter 由 `AgentLoader.deriveProfile()` 派生成 `Profile`
-- **一个 Agent 目录不是一个可执行 Tool**——它的子资源（Skill 正文、参考、脚本）经底座既有 `read_file` / `shell` 按需取用，不新造机制、不进 `ToolRegistry`
-- Skill 公共实体存 `.fourfeetcat/skills/<name>/`；Agent 通过自身 `skills/<name>` 相对软连接选择可见集合，**软连接集合是唯一绑定真相源**，不使用 frontmatter `skills:` 字段
-- 渐进式披露：prompt 只注入已绑定 Skill 的 name / description / 本地路径，正文与附属资源按需读取
+MUST 禁用 Spring AI 的自动 tool 执行。Tool 的调度和执行完全由 `ReActLoop` +
+`ToolExecutor` 控制。违反将导致 tool 被调两次（可测试：同一 tool 调用在
+`tool_invocations` 审计表中不得出现重复执行记录）。
 
-## 原则五：接口先行
+### 原则三：Provider 必须显式映射
 
-- `Sandbox`、`NotifyChannelAdapter`、`LongTermMemoryStore`、`InboundChannelAdapter`、`ScheduledTaskStore` 等抽象接口不携带任何实现细节（用最重的实现去反向套接口，也应能干净套入）
-- 扩展只新增实现类，不改接口、不改调用方
-- 契约在 core、实现在外围模块（依赖倒置），如 `fourfeetcat-core/channel/` 与 Channel 适配器模块、`fourfeetcat-core/knowledge/` 与 `fourfeetcat-knowledge`
+多 Provider 并存时 MUST 维护 `provider name → ChatModel` 的显式映射表
+（`Map<String, ChatModel>`），不得靠扫描 Spring 容器中的 `ChatModel` Bean 类型区分
+（Bean 类型相同，无法区分）。可测试：任一 LLM 调用 MUST 能通过映射 key 唯一确定
+provider，路由错乱即违宪。
 
-## 原则六：Plugin Tool 三档接入
+### 原则四：一个目录 = 一个 Agent；Skill 以本地软连接绑定并渐进披露
 
-1. 零代码：写 Agent 目录（AGENT.md）+ 复用社区现成 MCP server ——**主推**
-2. 轻代码：用任何语言自写 MCP server
-3. 重代码：Java `@Tool` 注解 Spring Bean
+**编号不可变动**：`docs/TechnicalSolution.md` 多处交叉引用"宪法原则四"。
 
-- 选择原则：能用方式一就不用方式二，能用方式二就不用方式三
-- 内置 Tool 与 MCP Tool 统一包装成 `CatTool` 注册到 `ToolRegistry`，ReAct 循环不感知 Tool 来源
+- 一个 Agent = `.fourfeetcat/agents/<name>/` 一个目录：`AGENT.md`（frontmatter 运行配置 +
+  正文任务指令）、可选 `skills/`、`scripts/`、`REFERENCE.md`。`AgentLoader.deriveProfile()`
+  把 frontmatter 派生成 `Profile`。
+- 公共 Skill 实体统一存放 `.fourfeetcat/skills/<name>/`；Agent 可见的 Skill 只由
+  `agents/<agent>/skills/<name>` 下指向公共实体的**相对软连接**表达——软连接集合是唯一
+  绑定真相源，`AGENT.md` frontmatter 不声明 `skills:`。
+- 加载走三层渐进式披露：每轮 prompt 只注入绑定 Skill 的 `name + description + 本地绝对
+  读取路径`；模型命中后用 `read_file` 读 `SKILL.md` 正文；附属资源按需读取或运行。
+  不得预载正文、不得新增 `use_skill`、Skill 不进 `ToolRegistry`。
+- 一个 Agent 目录**不是可执行 Tool**：`AGENT.md` 解析归 `ContextLoader`（正文注入
+  system prompt，子资源经 `read_file`/`shell` 取用）。
+- CRUD 与启动恢复 MUST 检测 dangling / escaped / invalid-target / name-mismatch /
+  stale-reference；公共 Skill 被引用时默认拒绝删除并返回引用 Agent。
 
-## 原则七：SQLite + Memory 三档后端 + 审计 day one
+### 原则五：审计表 Day One 写入
 
-- 关系型持久化用 SQLite（Flyway 双轨：SQLite 为默认零配置档，PostgreSQL 为部署选项）；Session、审计、定时任务数据落库
-- 长期记忆统一走 `LongTermMemoryStore` 接口墙，三档后端（`MarkdownMemoryStore` 默认 / `SqliteMemoryStore` / `Mem0MemoryStore`）靠 `memory.backend` 一行配置切换；核心/归档分区语义是必选能力
-- **审计表 `tool_invocations` 和 `llm_calls` 核心阶段就写入落库**，不是只放日志——可审计的数据地基 day one 就立起来
-- 凭证走 `${ENV_VAR}` 占位符从环境变量解析，不明文落地；不用 JDK 17 起已废弃的 `SecurityManager`
+`tool_invocations` 和 `llm_calls` 两张审计表 MUST 自核心阶段起写入（不需要查询接口，
+但写入不能省）。不得以"日志够了"为由跳过落库——可审计是 FourFeetCat 的核心差异化能力。
 
-## 原则八：无状态实例，状态外置
+工具治理层（020）为沙箱白名单之上独立的减法层：全局/Agent 级工具 allow/deny
+（`tool_policy_rules` 表，管理台可编辑热更新）。策略与沙箱正交：策略管「这个 Agent 能不能
+用这个工具」，沙箱管「执行时能碰什么资源」；策略放行不豁免沙箱。被策略拒绝的调用照写
+`tool_invocations` 且带 `blocked_by='policy'` 标记。
 
-- 运行实例不持有不可重建的状态，为单机走向分布式留好路
-- 单机先行，分布式能力（多副本、高可用、跨节点 Agent 协作）分阶段演进
+### 原则六：不使用 Java SecurityManager；软连接必须校验真实路径
 
-## 原则九：每个 user story 完成后有可演示 Demo
+`SecurityManager` 在 JDK 17 起废弃、JDK 21 已不可用，MUST NOT 使用。Sandbox 通过
+`SandboxChecker` 的白名单实现：
 
-- 优先级是跑通而非完美
-- 各 user story 以人推形态阶段性验证；最终三个验收 Demo（每日天气、每日科技日报、每日 GitHub 日报）以钟推形态完整跑通
+- 文件：路径白名单（`file.allowed_paths`）；文件目标存在时 MUST 用 `toRealPath()` 校验
+  真实路径仍位于白名单根，新建路径校验最近存在父目录的真实路径。
+- Shell：可执行文件精确白名单（`shell.allowed_commands`）；参数 argv 直传，不解释
+  Shell 语法。将解释器列入白名单是管理员对本机代码执行权限的显式授予，不构成隔离。
+- HTTP：域名通配符白名单（`http.allowed_domains`）。
+- SMTP：端点白名单（`smtp.allowed_endpoints`，按 `host:port` 精确放行，端口缺省=任意，
+  空=deny-all）。
+- Skill 绑定只允许指向 `.fourfeetcat/skills/` 的相对软连接，拒绝绝对链接与越界链接。
+
+### 原则七：同步执行模型
+
+核心阶段全程同步阻塞，配合 Java 21 Virtual Thread 处理并发。MUST NOT 引入 Reactor /
+WebFlux / CompletableFuture 等异步编程模型（SSE 流式响应放扩展阶段）。理由：保持核心
+简单可控，Virtual Thread 已自动处理 IO 等待。
+
+### 原则八：Tool 模块三合一
+
+内置 Tool、MCP Client 合并在一个 `fourfeetcat-tool` 模块，MUST NOT 拆成多个模块。
+`AGENT.md`（及 Agent 目录里的子指令）加载归 `fourfeetcat-core` 的 `ContextLoader`，
+不得放进 Tool 模块（否则 Agent 目录被当 Tool 注册，执行时报错）。
+
+## 技术与架构约束
+
+- **语言与运行时**：Java 21（必须，virtual thread 处理并发）+ Spring Boot 3.x；命令行
+  用 Picocli，YAML 用 SnakeYAML，日志用 Logback + SLF4J 结构化 JSON，构建为 Maven 多模块。
+- **持久化**：SQLite（默认零配置）/ PostgreSQL 14+（url 自动识别）+ Spring Data JPA。
+  表结构由 Flyway 管理，迁移脚本在 `fourfeetcat-storage` 的
+  `db/migration/{sqlite,postgresql}/` 双轨目录各写一份（同版本号）、只增不改。MUST NOT
+  依赖 `hibernate.ddl-auto=update`（保持 `none`）。
+- **模块化与依赖倒置**：模块间通过接口解耦，新增 Channel 或 Tool 只加新模块、不改
+  `fourfeetcat-core`；跨模块契约（接口 + 值对象）放 `fourfeetcat-core`，由下游模块实现。
+  MUST NOT 出现模块间循环依赖。模块结构可按需演进（v1.1.0 修订）：新建/改名模块 MUST 在
+  对应特性 plan 里声明理由，并同步更新 CLAUDE.md 模块表与 `docs/TechnicalSolution.md` §10。
+- **配置与凭证**：敏感配置（API key、MCP server 凭证）MUST 通过环境变量注入，不得明文
+  写在 Profile YAML。落库凭证经主密钥 AES-GCM 加密（`enc:v1:` 前缀），
+  `FOURFEETCAT_MASTER_KEY` 优先，缺省 `.fourfeetcat/master.key` 首启自动生成；密钥不
+  匹配启动即拒。`ConfigLoader` 启动时做必填项与格式校验，不得静默失败。
+- **无状态实例、状态外置**：会话、审计、记忆全部落库/落盘，实例可随时重启与横向扩展
+  ——这是走向分布式架构而不需要大改设计的前提。
+- **Docker 部署（纯增量形态）**：镜像内不跑 Maven（jar 平台无关，由构建方原生构建一次，
+  Dockerfile 只 COPY 胖 jar 进 JRE 基础镜像）；全部状态在 `/data` 卷；镜像非 root
+  （uid 1000）+ 内置 healthcheck。改 Dockerfile/entrypoint/.dockerignore 时
+  `ci.yml` 的 `docker-build` 门禁自动验证。
+
+## 开发工作流
+
+- **Spec Kit 流程**：特性开发走 `/speckit-specify` → `/speckit-clarify` → `/speckit-plan`
+  → `/speckit-tasks` → `/speckit-implement`；本宪法是所有 spec/plan/tasks 的上位约束，
+  违宪的特性文档在 analyze 阶段应被指出。
+- **实施节奏**：四周节奏（Provider+ReAct → Memory+Tool → Web → 多 Agent 收尾），每个
+  能力以对应验收 Demo 收口（`fourfeetcat chat` 查天气穿衣 / 跨对话记偏好 / 零代码 PR
+  digest / 10 个 REST 端点联动）。
+- **内容三处同步铁律**：`README.md`、官网首页（`website/.vitepress/theme/Home.vue` 双语）、
+  `docs/` 设计文档是同一事实的三个呈现。任何定位/特性/架构表述变更 MUST 三处一起改，
+  防止漂移。
+- **先 grep 再改编号**：修订宪法或文档中带编号的原则前，MUST 先全局 grep 交叉引用
+  （如「宪法原则四」），确认编号改动波及面后再动。
+- **常见陷阱即红线**：CLAUDE.md「常见陷阱」表（tool 被调两次、Provider 类型扫描、
+  审计只写日志、`ddl-auto=update`、ReAct 用异步、MEMORY.md 超长不截断、Tool 模块拆分）
+  视为宪法级反面清单，task 与 code review MUST 对照检查。
+- **分阶段克制**：先构建最小完整的运行时内核；治理和分布式基础设施在真实使用数据
+  验证后再做（核心阶段不做：认证、SSE 流式、WebSocket、限流、RBAC）。
+
+## Governance
+
+- 本宪法是项目最高开发准则，效力高于其他一切实践约定；CLAUDE.md 与本宪法同源维护，
+  修订 MUST 双写同步。
+- **修订程序**：修订 MUST 经主公（项目所有者）批准；MUST 附带 Sync Impact Report（版本
+  变更、原则增删改、迁移事项），涉及原则编号变动的 MUST 同时给出受影响交叉引用的清理
+  计划。
+- **版本策略**：语义化版本。MAJOR = 原则删除或重定义（含编号重排）；MINOR = 新增原则/
+  章节或实质性扩写；PATCH = 措辞与笔误澄清。
+- **合规审查**：所有 plan 与 code review MUST 对照本宪法核查（至少覆盖原则二、三、四、
+  五、六的可测试条款）；`speckit-analyze` 阶段发现违宪项应阻断而非仅提示。
+- 复杂度 MUST 有明确理由；运行期开发指引以 CLAUDE.md 为准。
+
+**Version**: 2.0.0 | **Ratified**: 2026-09-06 | **Last Amended**: 2026-09-06
