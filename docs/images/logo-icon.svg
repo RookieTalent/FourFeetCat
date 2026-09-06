@@ -1,31 +1,31 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" font-family="'PingFang SC','Segoe UI',Arial,sans-serif">
-  <!-- ═══════ 简笔蓝白猫脸 ═══════
-       白脸蓝边 · 蓝耳蓝额顶（蓝白双色）· 豆豆眼 · 粉鼻 · 胡须 -->
-  <!-- 头（大圆白脸） -->
-  <circle cx="100" cy="116" r="60" fill="#FFFFFF" stroke="#2E56A8" stroke-width="5.5"/>
+  <!-- ═══ 圆耳蓝白猫脸：无尖角，软萌 ═══
+       蓝圆耳（无尖）· 大白圆脸 · 大眼豆豆 · 粉鼻 · 粉腮 -->
 
-  <!-- 耳（白芯蓝边） -->
-  <path d="M 34 22 L 70 62 L 94 56 Z" fill="#FFFFFF" stroke="#2E56A8" stroke-width="5.5" stroke-linejoin="round"/>
-  <path d="M 166 22 L 130 62 L 106 56 Z" fill="#FFFFFF" stroke="#2E56A8" stroke-width="5.5" stroke-linejoin="round"/>
+  <!-- 蓝圆耳（先画，被白脸压住下半 → 只露两个圆顶） -->
+  <circle cx="54" cy="74" r="30" fill="#7CA4E0"/>
+  <circle cx="146" cy="74" r="30" fill="#7CA4E0"/>
 
-  <!-- 蓝白帽：额顶两耳之间的蓝罩 -->
-  <path d="M 56 78
-           A 60 60 0 0 1 144 78
-           C 138 92 120 101 100 101
-           C 80 101 62 92 56 78 Z"
-        fill="#7CA4E0"/>
+  <!-- 大白圆脸 -->
+  <circle cx="100" cy="132" r="60" fill="#FFFFFF" stroke="#2E56A8" stroke-width="5"/>
 
-  <!-- 豆豆眼 -->
-  <circle cx="74" cy="130" r="6.5" fill="#20355E"/>
-  <circle cx="126" cy="130" r="6.5" fill="#20355E"/>
-  <circle cx="72.2" cy="128" r="2" fill="#FFFFFF"/>
-  <circle cx="124.2" cy="128" r="2" fill="#FFFFFF"/>
+  <!-- 大眼 -->
+  <circle cx="74" cy="148" r="10" fill="#20355E"/>
+  <circle cx="126" cy="148" r="10" fill="#20355E"/>
+  <circle cx="71" cy="144" r="3.4" fill="#FFFFFF"/>
+  <circle cx="123" cy="144" r="3.4" fill="#FFFFFF"/>
 
   <!-- 粉鼻 -->
-  <path d="M 93 150 L 107 150 L 100 158 Z" fill="#F0A6B5" stroke="#F0A6B5" stroke-width="1" stroke-linejoin="round"/>
+  <path d="M 90 164 Q 100 180 110 164 Z" fill="#F0A6B5"/>
+  <!-- 嘴 -->
+  <path d="M 100 178 Q 95 185 88 182 M 100 178 Q 105 185 112 182"
+        stroke="#9AA7BD" stroke-width="3" stroke-linecap="round" fill="none"/>
 
-  <!-- 胡须 -->
-  <path d="M 60 144 L 30 140 M 58 154 L 28 156
-           M 140 144 L 170 140 M 142 154 L 172 156"
-        stroke="#A9C6EF" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- 粉腮 -->
+  <circle cx="58" cy="170" r="8" fill="#FCD9DF"/>
+  <circle cx="142" cy="170" r="8" fill="#FCD9DF"/>
+
+  <!-- 胡须（淡，可远观） -->
+  <path d="M 48 162 L 26 158 M 152 162 L 174 158"
+        stroke="#A9C6EF" stroke-width="2.5" stroke-linecap="round" fill="none"/>
 </svg>
