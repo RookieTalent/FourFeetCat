@@ -1,24 +1,24 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 220" font-family="'PingFang SC','Segoe UI','Helvetica Neue',Arial,sans-serif">
 
-  <!-- ═══ 标志：圆耳蓝白猫脸（无尖角） ═══ -->
-  <g transform="translate(16,10)">
-    <circle cx="54" cy="74" r="30" fill="#7CA4E0"/>
-    <circle cx="146" cy="74" r="30" fill="#7CA4E0"/>
-    <circle cx="100" cy="132" r="60" fill="#FFFFFF" stroke="#2E56A8" stroke-width="5"/>
-    <circle cx="74" cy="148" r="10" fill="#20355E"/>
-    <circle cx="126" cy="148" r="10" fill="#20355E"/>
-    <circle cx="71" cy="144" r="3.4" fill="#FFFFFF"/>
-    <circle cx="123" cy="144" r="3.4" fill="#FFFFFF"/>
-    <path d="M 90 164 Q 100 180 110 164 Z" fill="#F0A6B5"/>
-    <path d="M 100 178 Q 95 185 88 182 M 100 178 Q 105 185 112 182"
-          stroke="#9AA7BD" stroke-width="3" stroke-linecap="round" fill="none"/>
-    <circle cx="58" cy="170" r="8" fill="#FCD9DF"/>
-    <circle cx="142" cy="170" r="8" fill="#FCD9DF"/>
-    <path d="M 48 162 L 26 158 M 152 162 L 174 158"
+  <!-- ═══ 标志：手绘简笔猫脸 ═══ -->
+  <g transform="translate(18,12)">
+    <g stroke="#2E56A8" stroke-width="8" stroke-linecap="round" fill="none">
+      <path d="M 78 104 L 52 32 M 52 32 L 98 78"/>
+      <path d="M 122 104 L 148 32 M 148 32 L 102 78"/>
+    </g>
+    <circle cx="100" cy="132" r="58" fill="#FFFFFF" stroke="#2E56A8" stroke-width="6"/>
+    <circle cx="76" cy="158" r="9" fill="#20355E"/>
+    <circle cx="124" cy="158" r="9" fill="#20355E"/>
+    <circle cx="73" cy="154.5" r="3" fill="#FFFFFF"/>
+    <circle cx="121" cy="154.5" r="3" fill="#FFFFFF"/>
+    <path d="M 94 178 L 106 178 L 100 186 Z" fill="#F0A6B5" stroke-linejoin="round"/>
+    <path d="M 100 184 Q 96 190 90 188 M 100 184 Q 104 190 110 188"
+          stroke="#9AA7BD" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+    <path d="M 52 160 L 26 156 M 148 160 L 174 156"
           stroke="#A9C6EF" stroke-width="2.5" stroke-linecap="round" fill="none"/>
   </g>
 
   <!-- ═══ 字标 ═══ -->
-  <text x="212" y="122" font-size="58" font-weight="700" fill="#1E293B" letter-spacing="0.5">FourFeet<tspan fill="#3D6FD6" font-weight="800">Cat</tspan></text>
-  <text x="217" y="162" font-size="15" font-weight="600" fill="#5B6B84" letter-spacing="3">四脚猫 · Agent Harness OS</text>
+  <text x="212" y="124" font-size="58" font-weight="700" fill="#1E293B" letter-spacing="0.5">FourFeet<tspan fill="#3D6FD6" font-weight="800">Cat</tspan></text>
+  <text x="217" y="164" font-size="15" font-weight="600" fill="#5B6B84" letter-spacing="3">四脚猫 · Agent Harness OS</text>
 </svg>
