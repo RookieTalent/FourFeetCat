@@ -120,7 +120,7 @@
   <text x="818" y="595" text-anchor="middle" font-size="10.5" fill="#1E40AF">能力四</text>
   <text x="656" y="604" font-size="15" font-weight="700" fill="#1E3A8A">Tool 体系</text>
   <text x="656" y="632" font-size="12" fill="#475569">内置 Tool × 9 · MCP Client</text>
-  <text x="656" y="655" font-size="12" fill="#475569">ToolRegistry · OryxTool</text>
+  <text x="656" y="655" font-size="12" fill="#475569">ToolRegistry · CatTool</text>
   <text x="656" y="678" font-size="12" fill="#475569">沙箱白名单 · NotifyTools</text>
 
   <!-- ═══════════ 基础层 ═══════════ -->

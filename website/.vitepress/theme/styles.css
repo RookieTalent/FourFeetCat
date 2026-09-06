@@ -1,42 +1,42 @@
 /* ═══ FourFeetCat 视觉基调：明亮白底 · 蓝白猫色 ═══
    主蓝取自蓝白猫的“蓝”，白底对应“白”；无靛紫 */
 :root {
-  --oryx-bg: #FFFFFF;            /* 明亮白底 */
-  --oryx-bg-tint: #F2F7FF;       /* 极浅蓝白片色 */
-  --oryx-blue: #3D6FD6;          /* 主蓝（猫蓝） */
-  --oryx-sky: #6EA8E6;           /* 浅空蓝（渐变副色） */
-  --oryx-patch: #A9C6EF;         /* 蓝白猫色块 */
-  --oryx-deep: #1E293B;          /* 墨字 */
-  --oryx-muted: #5B6B84;         /* 灰蓝字 */
-  --oryx-border: #E3EAF5;        /* 细描边 */
-  --oryx-card: #FFFFFF;
-  --oryx-shadow: 0 10px 34px rgba(30, 64, 140, 0.08);
-  --oryx-font: 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-  --oryx-mono: ui-monospace, 'JetBrains Mono', 'Cascadia Code', Consolas, monospace;
+  --ffc-bg: #FFFFFF;            /* 明亮白底 */
+  --ffc-bg-tint: #F2F7FF;       /* 极浅蓝白片色 */
+  --ffc-blue: #3D6FD6;          /* 主蓝（猫蓝） */
+  --ffc-sky: #6EA8E6;           /* 浅空蓝（渐变副色） */
+  --ffc-patch: #A9C6EF;         /* 蓝白猫色块 */
+  --ffc-deep: #1E293B;          /* 墨字 */
+  --ffc-muted: #5B6B84;         /* 灰蓝字 */
+  --ffc-border: #E3EAF5;        /* 细描边 */
+  --ffc-card: #FFFFFF;
+  --ffc-shadow: 0 10px 34px rgba(30, 64, 140, 0.08);
+  --ffc-font: 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  --ffc-mono: ui-monospace, 'JetBrains Mono', 'Cascadia Code', Consolas, monospace;
 }
 
-.oryx-home {
+.ffc-home {
   min-height: 100vh;
-  background: var(--oryx-bg);
-  color: var(--oryx-deep);
-  font-family: var(--oryx-font);
+  background: var(--ffc-bg);
+  color: var(--ffc-deep);
+  font-family: var(--ffc-font);
   -webkit-font-smoothing: antialiased;
 }
 
-.oryx-home ::selection { background: rgba(61, 111, 214, 0.22); }
+.ffc-home ::selection { background: rgba(61, 111, 214, 0.22); }
 
-.oryx-section { max-width: 1080px; margin: 0 auto; padding: 84px 24px 0; }
+.ffc-section { max-width: 1080px; margin: 0 auto; padding: 84px 24px 0; }
 
-.oryx-kicker {
+.ffc-kicker {
   font-size: 13px; font-weight: 800; letter-spacing: 3px; text-transform: uppercase;
-  color: var(--oryx-blue); margin-bottom: 12px;
+  color: var(--ffc-blue); margin-bottom: 12px;
 }
 
-.oryx-h2 { font-size: 30px; font-weight: 800; color: var(--oryx-deep); letter-spacing: 0.5px; }
+.ffc-h2 { font-size: 30px; font-weight: 800; color: var(--ffc-deep); letter-spacing: 0.5px; }
 
-.oryx-lead { margin-top: 14px; font-size: 16px; line-height: 1.8; color: var(--oryx-muted); max-width: 760px; }
+.ffc-lead { margin-top: 14px; font-size: 16px; line-height: 1.8; color: var(--ffc-muted); max-width: 760px; }
 
-.oryx-gradient-text {
+.ffc-gradient-text {
   background: linear-gradient(110deg, #3D6FD6 10%, #6EA8E6 70%, #3D6FD6 100%);
   -webkit-background-clip: text; background-clip: text; color: transparent;
 }
