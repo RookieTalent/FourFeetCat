@@ -1,0 +1,26 @@
+#!/bin/sh
+# pre-commit：本地快反馈门禁（格式 + 编码规约）
+# 启用方式（一次性）：git config core.hooksPath .githooks
+# Maven 定位优先级：$MVN 环境变量 > PATH 上的 mvn > $MAVEN_HOME/bin/mvn
+set -e
+
+resolve_mvn() {
+  if [ -n "$MVN" ]; then
+    echo "$MVN"
+  elif command -v mvn >/dev/null 2>&1; then
+    echo mvn
+  elif [ -n "$MAVEN_HOME" ] && [ -x "$MAVEN_HOME/bin/mvn" ]; then
+    echo "$MAVEN_HOME/bin/mvn"
+  else
+    echo ""
+  fi
+}
+
+MVN_BIN="$(resolve_mvn)"
+if [ -z "$MVN_BIN" ]; then
+  echo "[pre-commit] 找不到 mvn：请安装 Maven 并加入 PATH，或 export MVN=<mvn 绝对路径>" >&2
+  exit 1
+fi
+
+echo "[pre-commit] $("$MVN_BIN" --version 2>/dev/null | head -1) 运行 verify 质量门禁（-DskipTests 跳过单测执行）"
+"$MVN_BIN" -q -B -ntp -DskipTests verify
