@@ -5,6 +5,21 @@ spring:
   threads:
     virtual:
       enabled: true
+  # 持久化：SQLite 默认零配置；FOURFEETCAT_ROOT 环境变量可整体搬移工作区
+  datasource:
+    url: jdbc:sqlite:${FOURFEETCAT_ROOT:.fourfeetcat}/fourfeetcat.db
+    driver-class-name: org.sqlite.JDBC
+    hikari:
+      # SQLite 单写者，单连接避免锁竞争
+      maximum-pool-size: 1
+  jpa:
+    database-platform: org.hibernate.community.dialect.SQLiteDialect
+    hibernate:
+      # 宪法：表结构只由 Flyway 迁移脚本管理
+      ddl-auto: none
+    open-in-view: false
+  flyway:
+    locations: classpath:db/migration/sqlite
 
 server:
   port: 8080
