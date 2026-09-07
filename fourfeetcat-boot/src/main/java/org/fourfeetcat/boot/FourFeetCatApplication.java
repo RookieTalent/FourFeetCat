@@ -12,7 +12,8 @@ public class FourFeetCatApplication {
 
   public static void main(String[] args) throws IOException {
     // jdbc:sqlite 只建文件不建目录，先确保工作区根目录存在（FOURFEETCAT_ROOT 可整体搬移）
-    Files.createDirectories(Path.of(System.getenv().getOrDefault("FOURFEETCAT_ROOT", ".fourfeetcat")));
+    Files.createDirectories(
+        Path.of(System.getenv().getOrDefault("FOURFEETCAT_ROOT", ".fourfeetcat")));
     SpringApplication.run(FourFeetCatApplication.class, args);
   }
 }
