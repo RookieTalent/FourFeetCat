@@ -1,6 +1,14 @@
 spring:
   application:
     name: fourfeetcat
+  # 宪法原则七：同步执行模型 + Java 21 虚拟线程处理并发
+  threads:
+    virtual:
+      enabled: true
+
+server:
+  port: 8080
+  shutdown: graceful
 
 management:
   endpoints:

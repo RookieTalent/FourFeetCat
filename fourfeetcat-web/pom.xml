@@ -21,6 +21,11 @@
       <groupId>org.fourfeetcat</groupId>
       <artifactId>fourfeetcat-storage</artifactId>
     </dependency>
+    <!-- HTTP 层：Spring MVC（宪法原则七：同步模型 + 虚拟线程，禁响应式） -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
     <!-- 监控：Actuator + Prometheus -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
