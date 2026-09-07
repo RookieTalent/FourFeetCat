@@ -158,18 +158,58 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-enforcer-plugin</artifactId>
           <version>${maven-enforcer-plugin.version}</version>
+          <executions>
+            <execution>
+              <goals>
+                <goal>enforce</goal>
+              </goals>
+            </execution>
+          </executions>
+          <configuration>
+            <rules>
+              <requireJavaVersion>
+                <version>[21,)</version>
+              </requireJavaVersion>
+              <requireMavenVersion>
+                <version>[3.9,)</version>
+              </requireMavenVersion>
+            </rules>
+          </configuration>
         </plugin>
-        <!-- 格式层（Google）：Spotless + google-java-format -->
+        <!-- 格式层（Google）：Spotless + google-java-format（宪法：格式冲突以 GJF 为准） -->
         <plugin>
           <groupId>com.diffplug.spotless</groupId>
           <artifactId>spotless-maven-plugin</artifactId>
           <version>${spotless.version}</version>
+          <configuration>
+            <java>
+              <googleJavaFormat>
+                <style>GOOGLE</style>
+              </googleJavaFormat>
+              <removeUnusedImports/>
+              <importOrder/>
+            </java>
+          </configuration>
+          <executions>
+            <execution>
+              <goals>
+                <goal>check</goal>
+              </goals>
+            </execution>
+          </executions>
         </plugin>
         <!-- 编码规约层（阿里巴巴 Java 开发手册）：P3C 挂在 PMD 6 线上 -->
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-pmd-plugin</artifactId>
           <version>${maven-pmd-plugin.version}</version>
+          <configuration>
+            <rulesets>
+              <ruleset>rulesets/java/ali-pmd.xml</ruleset>
+              <ruleset>rulesets/java/ali-concurrent.xml</ruleset>
+              <ruleset>rulesets/java/ali-exception.xml</ruleset>
+            </rulesets>
+          </configuration>
           <dependencies>
             <dependency>
               <groupId>com.alibaba.p3c</groupId>
@@ -177,12 +217,26 @@
               <version>${p3c.version}</version>
             </dependency>
           </dependencies>
+          <executions>
+            <execution>
+              <goals>
+                <goal>check</goal>
+              </goals>
+            </execution>
+          </executions>
         </plugin>
         <!-- 兜底静态检查：Checkstyle（google_checks） -->
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-checkstyle-plugin</artifactId>
           <version>${maven-checkstyle-plugin.version}</version>
+          <configuration>
+            <configLocation>google_checks.xml</configLocation>
+            <!-- 子模块基于各自的 basedir 运行，suppressions 放仓库根由 multiModuleProjectDirectory 定位 -->
+            <suppressionsLocation>${maven.multiModuleProjectDirectory}/config/checkstyle/checkstyle-suppressions.xml</suppressionsLocation>
+            <failOnViolation>true</failOnViolation>
+            <includeTestSourceDirectory>true</includeTestSourceDirectory>
+          </configuration>
           <dependencies>
             <dependency>
               <groupId>com.puppycrawl.tools</groupId>
@@ -190,6 +244,13 @@
               <version>${checkstyle.version}</version>
             </dependency>
           </dependencies>
+          <executions>
+            <execution>
+              <goals>
+                <goal>check</goal>
+              </goals>
+            </execution>
+          </executions>
         </plugin>
         <!-- 安全检查：SpotBugs + Find Security Bugs -->
         <plugin>

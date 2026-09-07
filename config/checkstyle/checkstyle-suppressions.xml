@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<!DOCTYPE suppressions PUBLIC
+    "-//Checkstyle//DTD SuppressionFilter Configuration 1.2//EN"
+    "https://checkstyle.org/dtds/suppressions_1_2.dtd">
+
+<!-- 兜底抑制清单：google_checks.xml 的 Javadoc 系列模块本身为 warning 级，
+     配合插件 violationSeverity=error 天然不拦截，此文件留作未来噪声的逃生阀。
+
+     原则：格式以 google-java-format（Spotless）为准。
+     CustomImportOrder 与 GJF 在「java.* 与 com.* 混排」时排序口径相左（GJF 纯 ASCII，
+     google_checks 的 STANDARD/THIRD_PARTY 分组），故 import 顺序统一交给 Spotless 兜底。 -->
+<suppressions>
+  <suppress checks="CustomImportOrder" files=".*\.java"/>
+</suppressions>
