@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>3.5.16</version>
+    <relativePath/>
+  </parent>
+
+  <groupId>org.fourfeetcat</groupId>
+  <artifactId>fourfeetcat</artifactId>
+  <version>0.1.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+  <name>FourFeetCat</name>
+  <description>FourFeetCat —— 面向企业场景的 Distributed AI Agent OS（多模块父工程）</description>
+
+  <modules>
+    <module>fourfeetcat-core</module>
+    <module>fourfeetcat-provider</module>
+    <module>fourfeetcat-memory</module>
+    <module>fourfeetcat-tool</module>
+    <module>fourfeetcat-channel-cli</module>
+    <module>fourfeetcat-web</module>
+    <module>fourfeetcat-storage</module>
+    <module>fourfeetcat-cli</module>
+    <module>fourfeetcat-boot</module>
+  </modules>
+
+  <properties>
+    <java.version>21</java.version>
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <!-- 本项目模块间版本统一由父 pom 管理，子模块声明依赖不写版本 -->
+      <dependency>
+        <groupId>org.fourfeetcat</groupId>
+        <artifactId>fourfeetcat-core</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.fourfeetcat</groupId>
+        <artifactId>fourfeetcat-provider</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.fourfeetcat</groupId>
+        <artifactId>fourfeetcat-memory</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.fourfeetcat</groupId>
+        <artifactId>fourfeetcat-tool</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.fourfeetcat</groupId>
+        <artifactId>fourfeetcat-channel-cli</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.fourfeetcat</groupId>
+        <artifactId>fourfeetcat-web</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.fourfeetcat</groupId>
+        <artifactId>fourfeetcat-storage</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.fourfeetcat</groupId>
+        <artifactId>fourfeetcat-cli</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.fourfeetcat</groupId>
+        <artifactId>fourfeetcat-boot</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+</project>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.fourfeetcat</groupId>
+    <artifactId>fourfeetcat</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>fourfeetcat-memory</artifactId>
+  <name>FourFeetCat :: Memory</name>
+  <description>能力三：MemoryService 门面、LongTermMemory 三档后端、记忆检索引擎与 MemoryTools</description>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.fourfeetcat</groupId>
+      <artifactId>fourfeetcat-core</artifactId>
+    </dependency>
+  </dependencies>
+</project>

@@ -1,0 +1,20 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# 对齐 google-java-format：2 空格缩进、行宽 100
+[*.java]
+indent_style = space
+indent_size = 2
+max_line_length = 100
+
+[*.{xml,yaml,yml,properties}]
+indent_style = space
+indent_size = 2
+
+[*.md]
+trim_trailing_whitespace = false

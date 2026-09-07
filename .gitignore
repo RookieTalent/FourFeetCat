@@ -4,8 +4,15 @@ website/.vitepress/dist/
 website/.vitepress/cache/
 website/.vitepress/*.log
 
-# OryxOS 运行时工作区（含密钥与本地数据，绝不入库）
+# 运行时工作区（含数据库与密钥，绝不入库）
 .oryxos/
+.fourfeetcat/
+
+# Maven
+target/
+*.class
+hs_err_pid*
+replay_pid*
 
 # IDE
 .idea/
