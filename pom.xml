@@ -30,10 +30,77 @@
 
   <properties>
     <java.version>21</java.version>
+
+    <!-- 依赖版本（未列出者由 spring-boot-starter-parent 托管） -->
+    <spring-ai.version>1.1.2</spring-ai.version>
+    <spring-ai-alibaba.version>1.1.2.3</spring-ai-alibaba.version>
+    <springdoc.version>2.9.1</springdoc.version>
+    <sqlite-jdbc.version>3.53.4.0</sqlite-jdbc.version>
+    <!-- 必须与 spring-boot-starter-parent 托管的 hibernate.version 完全一致（SQLite 方言） -->
+    <hibernate-community-dialects.version>6.6.53.Final</hibernate-community-dialects.version>
+    <picocli.version>4.7.7</picocli.version>
+    <logstash-encoder.version>9.0</logstash-encoder.version>
+
+    <!-- 质量插件版本 -->
+    <maven-enforcer-plugin.version>3.6.1</maven-enforcer-plugin.version>
+    <spotless.version>3.10.2</spotless.version>
+    <!-- 冻结：3.22.0+ 切到 PMD 7，与 p3c-pmd（PMD 6 API）不兼容 -->
+    <maven-pmd-plugin.version>3.21.2</maven-pmd-plugin.version>
+    <p3c.version>2.1.1</p3c.version>
+    <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
+    <!-- 覆盖插件内嵌 checkstyle（默认 9.3 解析不了 Java 21 语法） -->
+    <checkstyle.version>10.26.1</checkstyle.version>
+    <spotbugs-plugin.version>4.10.4.1</spotbugs-plugin.version>
+    <findsecbugs.version>1.14.0</findsecbugs.version>
+    <dependency-check.version>13.0.0</dependency-check.version>
   </properties>
 
   <dependencyManagement>
     <dependencies>
+      <!-- LLM 技术栈：Spring AI 与 Spring AI Alibaba 成对锁定（alibaba 在后，自家版本优先）。
+           宪法原则二：Spring AI 只用于协议转换 + @Tool schema 生成，禁用自动 tool 执行。 -->
+      <dependency>
+        <groupId>org.springframework.ai</groupId>
+        <artifactId>spring-ai-bom</artifactId>
+        <version>${spring-ai.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.alibaba.cloud.ai</groupId>
+        <artifactId>spring-ai-alibaba-bom</artifactId>
+        <version>${spring-ai-alibaba.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+
+      <!-- 第三方（Boot 不托管的） -->
+      <dependency>
+        <groupId>org.springdoc</groupId>
+        <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+        <version>${springdoc.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.xerial</groupId>
+        <artifactId>sqlite-jdbc</artifactId>
+        <version>${sqlite-jdbc.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.hibernate.orm</groupId>
+        <artifactId>hibernate-community-dialects</artifactId>
+        <version>${hibernate-community-dialects.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>info.picocli</groupId>
+        <artifactId>picocli</artifactId>
+        <version>${picocli.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>net.logstash.logback</groupId>
+        <artifactId>logstash-logback-encoder</artifactId>
+        <version>${logstash-encoder.version}</version>
+      </dependency>
+
       <!-- 本项目模块间版本统一由父 pom 管理，子模块声明依赖不写版本 -->
       <dependency>
         <groupId>org.fourfeetcat</groupId>
@@ -82,4 +149,68 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <!-- 环境门禁：JDK 21 / Maven 3.9+ -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-enforcer-plugin</artifactId>
+          <version>${maven-enforcer-plugin.version}</version>
+        </plugin>
+        <!-- 格式层（Google）：Spotless + google-java-format -->
+        <plugin>
+          <groupId>com.diffplug.spotless</groupId>
+          <artifactId>spotless-maven-plugin</artifactId>
+          <version>${spotless.version}</version>
+        </plugin>
+        <!-- 编码规约层（阿里巴巴 Java 开发手册）：P3C 挂在 PMD 6 线上 -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-pmd-plugin</artifactId>
+          <version>${maven-pmd-plugin.version}</version>
+          <dependencies>
+            <dependency>
+              <groupId>com.alibaba.p3c</groupId>
+              <artifactId>p3c-pmd</artifactId>
+              <version>${p3c.version}</version>
+            </dependency>
+          </dependencies>
+        </plugin>
+        <!-- 兜底静态检查：Checkstyle（google_checks） -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-checkstyle-plugin</artifactId>
+          <version>${maven-checkstyle-plugin.version}</version>
+          <dependencies>
+            <dependency>
+              <groupId>com.puppycrawl.tools</groupId>
+              <artifactId>checkstyle</artifactId>
+              <version>${checkstyle.version}</version>
+            </dependency>
+          </dependencies>
+        </plugin>
+        <!-- 安全检查：SpotBugs + Find Security Bugs -->
+        <plugin>
+          <groupId>com.github.spotbugs</groupId>
+          <artifactId>spotbugs-maven-plugin</artifactId>
+          <version>${spotbugs-plugin.version}</version>
+          <dependencies>
+            <dependency>
+              <groupId>com.h3xstream.findsecbugs</groupId>
+              <artifactId>findsecbugs-plugin</artifactId>
+              <version>${findsecbugs.version}</version>
+            </dependency>
+          </dependencies>
+        </plugin>
+        <!-- 安全检查：OWASP Dependency-Check（放独立 profile，不挂默认 verify） -->
+        <plugin>
+          <groupId>org.owasp</groupId>
+          <artifactId>dependency-check-maven</artifactId>
+          <version>${dependency-check.version}</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
 </project>
