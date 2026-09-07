@@ -7,7 +7,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /** FourFeetCat 启动入口（fat JAR 由 spring-boot-maven-plugin repackage 产出）。 */
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = "org.fourfeetcat")
 public class FourFeetCatApplication {
 
   public static void main(String[] args) throws IOException {
