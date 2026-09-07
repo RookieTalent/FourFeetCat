@@ -1,15 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 220" font-family="'PingFang SC','Segoe UI','Helvetica Neue',Arial,sans-serif">
 
-  <!-- ═══ 标志：爪印猫（掌垫即猫头：无耳无眼，粉鼻 + ω 笑嘴）═══ -->
-  <g transform="translate(22,8)">
-    <ellipse cx="40" cy="88" rx="17" ry="18" fill="#3D6FD6"/>
-    <ellipse cx="78" cy="58" rx="17" ry="18" fill="#3D6FD6"/>
-    <ellipse cx="122" cy="58" rx="17" ry="18" fill="#3D6FD6"/>
-    <ellipse cx="160" cy="88" rx="17" ry="18" fill="#3D6FD6"/>
-    <circle cx="100" cy="138" r="56" fill="#3D6FD6"/>
-    <ellipse cx="100" cy="126" rx="8" ry="6.5" fill="#F0A6B5"/>
-    <path d="M 100 136 Q 93 148 83 143 M 100 136 Q 107 148 117 143"
-          stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" fill="none"/>
+  <!-- ═══ 标志：笑猫圆头（爪印去趾，圆掌垫即猫脸：粉鼻 + ω 笑嘴）═══ -->
+  <g transform="translate(48,36) scale(0.76)">
+    <circle cx="100" cy="100" r="84" fill="#3D6FD6"/>
+    <ellipse cx="100" cy="104" rx="10" ry="7.5" fill="#F0A6B5"/>
+    <path d="M 100 116 Q 90 128 78 122 M 100 116 Q 110 128 122 122"
+          stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" fill="none"/>
   </g>
 
   <!-- ═══ 字标 ═══ -->

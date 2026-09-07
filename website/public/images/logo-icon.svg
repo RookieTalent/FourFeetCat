@@ -1,22 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-  <!-- ═══ 爪印猫 ═══
-       一枚蓝色爪印：四只脚趾下压、与圆掌垫几乎相切，紧凑一坨。
-       掌垫即猫头——无耳、无眼，只有粉鼻 + ω 笑嘴。
-       远看是爪印，近看那只猫在笑；「四脚猫」三字尽在一图。 -->
-
-  <!-- 四只脚趾 -->
-  <g transform="translate(0,-17)">
-    <ellipse cx="40" cy="88" rx="17" ry="18" fill="#3D6FD6"/>
-    <ellipse cx="78" cy="58" rx="17" ry="18" fill="#3D6FD6"/>
-    <ellipse cx="122" cy="58" rx="17" ry="18" fill="#3D6FD6"/>
-    <ellipse cx="160" cy="88" rx="17" ry="18" fill="#3D6FD6"/>
-
-    <!-- 圆掌垫 = 猫头 -->
-    <circle cx="100" cy="138" r="56" fill="#3D6FD6"/>
-
-    <!-- 粉鼻 + ω 笑嘴 -->
-    <ellipse cx="100" cy="126" rx="8" ry="6.5" fill="#F0A6B5"/>
-    <path d="M 100 136 Q 93 148 83 143 M 100 136 Q 107 148 117 143"
-          stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" fill="none"/>
-  </g>
+  <!-- ═══ 笑猫圆头 ═══
+       爪印去趾后，圆掌垫即猫脸——无耳、无眼，只留粉鼻 + ω 笑嘴，
+       正脸居中，一枚干净的蓝色笑猫圆头。
+       极简、favicon / 角标小尺寸依然清晰。 -->
+  <circle cx="100" cy="100" r="84" fill="#3D6FD6"/>
+  <ellipse cx="100" cy="104" rx="10" ry="7.5" fill="#F0A6B5"/>
+  <path d="M 100 116 Q 90 128 78 122 M 100 116 Q 110 128 122 122"
+        stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" fill="none"/>
 </svg>
