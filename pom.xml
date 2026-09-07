@@ -44,9 +44,10 @@
     <!-- 质量插件版本 -->
     <maven-enforcer-plugin.version>3.6.1</maven-enforcer-plugin.version>
     <spotless.version>3.10.2</spotless.version>
-    <!-- 冻结：3.22.0+ 切到 PMD 7，与 p3c-pmd（PMD 6 API）不兼容 -->
-    <maven-pmd-plugin.version>3.21.2</maven-pmd-plugin.version>
-    <p3c.version>2.1.1</p3c.version>
+    <!-- PMD 7：内嵌 ASM 可读 Java 21（class major 65）字节码；p3c-pmd 2.1.1 基于 PMD 6，
+         对 Java 21 类型解析必崩（Unsupported class file major version 65），故弃用阿里细则，
+         改走 PMD7 官方 category 规则集（见 build.plugins 注释，构成方略风险表逃生通道的执行）。 -->
+    <maven-pmd-plugin.version>3.28.0</maven-pmd-plugin.version>
     <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
     <!-- 覆盖插件内嵌 checkstyle（默认 9.3 解析不了 Java 21 语法） -->
     <checkstyle.version>10.26.1</checkstyle.version>
@@ -152,91 +153,27 @@
 
   <build>
     <pluginManagement>
+      <!-- 仅做版本 / 插件类路径锁定；活跃执行绑定见下方 build.plugins -->
       <plugins>
-        <!-- 环境门禁：JDK 21 / Maven 3.9+ -->
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-enforcer-plugin</artifactId>
           <version>${maven-enforcer-plugin.version}</version>
-          <executions>
-            <execution>
-              <goals>
-                <goal>enforce</goal>
-              </goals>
-            </execution>
-          </executions>
-          <configuration>
-            <rules>
-              <requireJavaVersion>
-                <version>[21,)</version>
-              </requireJavaVersion>
-              <requireMavenVersion>
-                <version>[3.9,)</version>
-              </requireMavenVersion>
-            </rules>
-          </configuration>
         </plugin>
-        <!-- 格式层（Google）：Spotless + google-java-format（宪法：格式冲突以 GJF 为准） -->
         <plugin>
           <groupId>com.diffplug.spotless</groupId>
           <artifactId>spotless-maven-plugin</artifactId>
           <version>${spotless.version}</version>
-          <configuration>
-            <java>
-              <googleJavaFormat>
-                <style>GOOGLE</style>
-              </googleJavaFormat>
-              <removeUnusedImports/>
-              <importOrder/>
-            </java>
-          </configuration>
-          <executions>
-            <execution>
-              <goals>
-                <goal>check</goal>
-              </goals>
-            </execution>
-          </executions>
         </plugin>
-        <!-- 编码规约层（阿里巴巴 Java 开发手册）：P3C 挂在 PMD 6 线上 -->
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-pmd-plugin</artifactId>
           <version>${maven-pmd-plugin.version}</version>
-          <configuration>
-            <rulesets>
-              <ruleset>rulesets/java/ali-pmd.xml</ruleset>
-              <ruleset>rulesets/java/ali-concurrent.xml</ruleset>
-              <ruleset>rulesets/java/ali-exception.xml</ruleset>
-            </rulesets>
-          </configuration>
-          <dependencies>
-            <dependency>
-              <groupId>com.alibaba.p3c</groupId>
-              <artifactId>p3c-pmd</artifactId>
-              <version>${p3c.version}</version>
-            </dependency>
-          </dependencies>
-          <executions>
-            <execution>
-              <goals>
-                <goal>check</goal>
-              </goals>
-            </execution>
-          </executions>
         </plugin>
-        <!-- 兜底静态检查：Checkstyle（google_checks） -->
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-checkstyle-plugin</artifactId>
           <version>${maven-checkstyle-plugin.version}</version>
-          <configuration>
-            <configLocation>google_checks.xml</configLocation>
-            <!-- 子模块基于各自的 basedir 运行，suppressions 放仓库根由 multiModuleProjectDirectory 定位 -->
-            <suppressionsLocation>${maven.multiModuleProjectDirectory}/config/checkstyle/checkstyle-suppressions.xml</suppressionsLocation>
-            <failOnViolation>true</failOnViolation>
-            <includeTestSourceDirectory>true</includeTestSourceDirectory>
-          </configuration>
           <dependencies>
             <dependency>
               <groupId>com.puppycrawl.tools</groupId>
@@ -244,15 +181,7 @@
               <version>${checkstyle.version}</version>
             </dependency>
           </dependencies>
-          <executions>
-            <execution>
-              <goals>
-                <goal>check</goal>
-              </goals>
-            </execution>
-          </executions>
         </plugin>
-        <!-- 安全检查：SpotBugs + Find Security Bugs -->
         <plugin>
           <groupId>com.github.spotbugs</groupId>
           <artifactId>spotbugs-maven-plugin</artifactId>
@@ -265,7 +194,6 @@
             </dependency>
           </dependencies>
         </plugin>
-        <!-- 安全检查：OWASP Dependency-Check（放独立 profile，不挂默认 verify） -->
         <plugin>
           <groupId>org.owasp</groupId>
           <artifactId>dependency-check-maven</artifactId>
@@ -273,5 +201,145 @@
         </plugin>
       </plugins>
     </pluginManagement>
+
+    <!-- 质量门禁：随 verify 生命周期执行，任一红即构建失败 -->
+    <plugins>
+      <!-- 环境门禁：JDK 21 / Maven 3.9+（validate 阶段） -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <configuration>
+          <rules>
+            <requireJavaVersion>
+              <version>[21,)</version>
+            </requireJavaVersion>
+            <requireMavenVersion>
+              <version>[3.9,)</version>
+            </requireMavenVersion>
+          </rules>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- 格式层（Google）：Spotless + google-java-format（宪法：格式冲突以 GJF 为准） -->
+      <plugin>
+        <groupId>com.diffplug.spotless</groupId>
+        <artifactId>spotless-maven-plugin</artifactId>
+        <configuration>
+          <java>
+            <googleJavaFormat>
+              <style>GOOGLE</style>
+            </googleJavaFormat>
+            <removeUnusedImports/>
+            <importOrder/>
+          </java>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- 编码规约（PMD 7）：p3c-pmd 2.1.1 与 Java 21 不兼容（详见 properties 注释），
+           改用 PMD7 官方 category 规则集——bestpractices + errorprone 覆盖常见编码规约
+           （阿里手册的核心条目多落在此两类），既不误伤业务代码又可读 Java 21。 -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-pmd-plugin</artifactId>
+        <configuration>
+          <rulesets>
+            <ruleset>category/java/bestpractices.xml</ruleset>
+            <ruleset>category/java/errorprone.xml</ruleset>
+          </rulesets>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- 兜底静态检查：Checkstyle（google_checks）+ 仓库根 suppression -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <configuration>
+          <configLocation>google_checks.xml</configLocation>
+          <!-- 子模块基于各自 basedir 运行，suppressions 放仓库根由 multiModuleProjectDirectory 定位 -->
+          <suppressionsLocation>${maven.multiModuleProjectDirectory}/config/checkstyle/checkstyle-suppressions.xml</suppressionsLocation>
+          <failOnViolation>true</failOnViolation>
+          <includeTestSourceDirectory>true</includeTestSourceDirectory>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- 安全检查：SpotBugs + Find Security Bugs（effort=Max 扫描 OWASP Top 10 类漏洞） -->
+      <plugin>
+        <groupId>com.github.spotbugs</groupId>
+        <artifactId>spotbugs-maven-plugin</artifactId>
+        <configuration>
+          <effort>Max</effort>
+          <threshold>Low</threshold>
+          <!-- FindSecBugs 的 SPRING_ENDPOINT 把每个 Controller 当信息项提示（本工程 API 端点遍地皆是），
+               属固有噪音，统一排除；真正的 Spring 安全漏洞检测器（CSRF/注入等）不受影响 -->
+          <excludeFilterFile>${maven.multiModuleProjectDirectory}/config/spotbugs/spotbugs-exclude.xml</excludeFilterFile>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
   </build>
+
+  <profiles>
+    <!-- OWASP Dependency-Check：扫第三方依赖已知 CVE。慢（NVD API 限流），
+         不挂默认 verify —— CI 用独立 job，本地 mvn verify -Pdependency-check 主动触发 -->
+    <profile>
+      <id>dependency-check</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.owasp</groupId>
+            <artifactId>dependency-check-maven</artifactId>
+            <configuration>
+              <failBuildOnCVSS>7</failBuildOnCVSS>
+              <nvdApiKey>${env.NVD_API_KEY}</nvdApiKey>
+              <formats>
+                <format>HTML</format>
+                <format>JSON</format>
+              </formats>
+            </configuration>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>aggregate</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>

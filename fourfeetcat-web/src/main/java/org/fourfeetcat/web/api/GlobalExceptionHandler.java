@@ -33,10 +33,10 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(Exception.class)
   public ResponseEntity<ApiResponse<Void>> internalError(Exception ex) {
     log.error("未处理异常", ex);
-    return respond(ErrorCode.INTERNAL_ERROR, ErrorCode.INTERNAL_ERROR.reason());
+    return respond(ErrorCode.INTERNAL_ERROR, ErrorCode.INTERNAL_ERROR.getReason());
   }
 
   private ResponseEntity<ApiResponse<Void>> respond(ErrorCode errorCode, String message) {
-    return ResponseEntity.status(errorCode.code()).body(ApiResponse.error(errorCode, message));
+    return ResponseEntity.status(errorCode.getCode()).body(ApiResponse.error(errorCode, message));
   }
 }

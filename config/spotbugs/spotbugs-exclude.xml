@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+  <!-- SPRING_ENDPOINT 是 FindSecBugs 的信息级探测器：凡 @RestController/@Controller 皆报。
+       FourFeetCat 本身就是 REST 服务，该提示无安全增益，统一排除；
+       真正的 Spring 安全规则（CSRF 不受限映射、路径穿越、注入类）不在排除之列。 -->
+  <Match>
+    <Bug pattern="SPRING_ENDPOINT"/>
+  </Match>
+</FindBugsFilter>

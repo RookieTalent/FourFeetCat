@@ -16,11 +16,11 @@ public enum ErrorCode {
     this.reason = reason;
   }
 
-  public int code() {
+  public int getCode() {
     return code;
   }
 
-  public String reason() {
+  public String getReason() {
     return reason;
   }
 }

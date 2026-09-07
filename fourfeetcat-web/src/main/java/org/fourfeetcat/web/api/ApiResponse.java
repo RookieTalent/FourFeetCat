@@ -6,10 +6,10 @@ import java.time.Instant;
 public record ApiResponse<T>(int code, String message, T data, Instant timestamp) {
 
   public static <T> ApiResponse<T> ok(T data) {
-    return new ApiResponse<>(ErrorCode.OK.code(), ErrorCode.OK.reason(), data, Instant.now());
+    return new ApiResponse<>(ErrorCode.OK.getCode(), ErrorCode.OK.getReason(), data, Instant.now());
   }
 
   public static ApiResponse<Void> error(ErrorCode errorCode, String message) {
-    return new ApiResponse<>(errorCode.code(), message, null, Instant.now());
+    return new ApiResponse<>(errorCode.getCode(), message, null, Instant.now());
   }
 }
