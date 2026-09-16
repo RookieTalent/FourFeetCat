@@ -21,6 +21,14 @@ spring:
   flyway:
     locations: classpath:db/migration/sqlite
 
+# 全局层（课件第16节）：声明本实例接了哪些 provider、凭证从哪个环境变量读；key 只走 ${ENV} 占位，不落明文。
+# 缺省值为空串：零 key 可 boot（对齐 Docker entrypoint 口径）；真调用时由模型端报认证错误，不静默。
+fourfeetcat:
+  providers:
+    - name: deepseek
+      base-url: https://api.deepseek.com
+      api-key: ${DEEPSEEK_API_KEY:}
+
 server:
   port: 8080
   shutdown: graceful

@@ -17,6 +17,11 @@
       <groupId>org.fourfeetcat</groupId>
       <artifactId>fourfeetcat-core</artifactId>
     </dependency>
+    <!-- LlmCallRecorder 端口签名的 Usage 类型（core 的 spring-ai-model 直依声明，不靠传递） -->
+    <dependency>
+      <groupId>org.springframework.ai</groupId>
+      <artifactId>spring-ai-model</artifactId>
+    </dependency>
     <!-- 持久化：SQLite（默认零配置）+ Spring Data JPA + Flyway（表结构只走迁移脚本，ddl-auto=none） -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -34,6 +39,11 @@
     <dependency>
       <groupId>org.hibernate.orm</groupId>
       <artifactId>hibernate-community-dialects</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 </project>

@@ -5,9 +5,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 /** FourFeetCat 启动入口（fat JAR 由 spring-boot-maven-plugin repackage 产出）。 */
 @SpringBootApplication(scanBasePackages = "org.fourfeetcat")
+@EnableJpaRepositories(basePackages = "org.fourfeetcat")
+@EntityScan(basePackages = "org.fourfeetcat")
 public class FourFeetCatApplication {
 
   public static void main(String[] args) throws IOException {

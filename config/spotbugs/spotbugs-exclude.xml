@@ -6,4 +6,34 @@
   <Match>
     <Bug pattern="SPRING_ENDPOINT"/>
   </Match>
+
+  <!-- Profile 是 record 值对象：紧凑构造器已做防御性不可变化（null 容器落空集合、其余
+       unmodifiable 包装）。EI_EXPOSE_REP/EI_EXPOSE_REP2 只看字段类型不看 unmodifiable 包装，
+       对 record 访问器属固有误报；真正的可变暴露（构造后可被外部改）已被拷贝消解。 -->
+  <Match>
+    <Class name="org.fourfeetcat.core.profile.Profile"/>
+    <Bug pattern="EI_EXPOSE_REP,EI_EXPOSE_REP2"/>
+  </Match>
+
+  <!-- 同上：ProviderProperties record 紧凑构造器已 List.copyOf 防御性拷贝。 -->
+  <Match>
+    <Class name="org.fourfeetcat.provider.ProviderConfiguration$ProviderProperties"/>
+    <Bug pattern="EI_EXPOSE_REP,EI_EXPOSE_REP2"/>
+  </Match>
+
+  <!-- ProviderService.chat 的 catch 后原样重抛是课件第16节钦定形态（"调用失败也留痕，再把错误抛给
+       上层处理"）。精确重抛使 javac 在字节码 throws 属性标记 RuntimeException，触发该 Low 级形态
+       探测器；语义无变化（异常类型、消息原样上抛），属固有噪音。 -->
+  <Match>
+    <Class name="org.fourfeetcat.provider.ProviderService"/>
+    <Bug pattern="THROWS_METHOD_THROWS_RUNTIMEEXCEPTION"/>
+  </Match>
+
+  <!-- CRLF_INJECTION_LOGS：profile 包只在本地工作区错误路径记录文件名与异常消息，输入非
+       网络/对话用户可控（Profile 文件由部署者自管），日志注入风险不适用；sanitizing 会削弱
+       排障信息。对话用户可控的输入进入日志的路径（未来 Channel/CLI 层）不在本排除之列。 -->
+  <Match>
+    <Class name="~org\.fourfeetcat\.core\.profile\..*"/>
+    <Bug pattern="CRLF_INJECTION_LOGS"/>
+  </Match>
 </FindBugsFilter>

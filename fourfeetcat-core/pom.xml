@@ -11,4 +11,20 @@
   <artifactId>fourfeetcat-core</artifactId>
   <name>FourFeetCat :: Core</name>
   <description>核心抽象：CatTool 接口、Session、Profile、ContextLoader、ReActLoop、PromptBuilder、ToolExecutor、AgentService 及跨模块契约（依赖倒置，禁止依赖其他业务模块）</description>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.springframework.ai</groupId>
+      <artifactId>spring-ai-model</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.yaml</groupId>
+      <artifactId>snakeyaml</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
 </project>

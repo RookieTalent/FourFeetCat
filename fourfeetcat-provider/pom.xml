@@ -17,5 +17,25 @@
       <groupId>org.fourfeetcat</groupId>
       <artifactId>fourfeetcat-core</artifactId>
     </dependency>
+    <!-- Spring AI 只做协议转换 + schema 生成（宪法原则二）；ChatModel 实现走 OpenAI 兼容端点，
+         版本由根 pom 的 Spring AI BOM 锁定，alibaba BOM 照 import 不消费（见 specs/001 research.md D2） -->
+    <dependency>
+      <groupId>org.springframework.ai</groupId>
+      <artifactId>spring-ai-model</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.ai</groupId>
+      <artifactId>spring-ai-openai</artifactId>
+    </dependency>
+    <!-- @Configuration/@ConfigurationProperties 装配（boot 自动配置刚需，非业务功能依赖） -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 </project>
