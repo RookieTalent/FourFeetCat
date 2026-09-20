@@ -1,0 +1,5 @@
+# 单模块测试上下文缺省会递归扫 classpath:db/migration，把 sqlite 与 postgresql 两条轨的同版本脚本一起收上来
+# （Flyway 报 "Found more than one migration with version 17"）。此处与 boot 的生产配置同口径，只走 sqlite 轨。
+spring:
+  flyway:
+    locations: classpath:db/migration/sqlite

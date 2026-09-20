@@ -15,6 +15,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Map;
+
 import org.fourfeetcat.core.LlmCallRecorder;
 import org.fourfeetcat.core.profile.Profile;
 import org.junit.jupiter.api.BeforeEach;

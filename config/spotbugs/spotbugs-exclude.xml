@@ -36,4 +36,11 @@
     <Class name="~org\.fourfeetcat\.core\.profile\..*"/>
     <Bug pattern="CRLF_INJECTION_LOGS"/>
   </Match>
+
+  <!-- 同上：ContextLoader 的告警只记工作区里 Bootstrap 文件的路径（部署者自管的本地输入，
+       非网络/对话用户可控）；sanitizing 会让"到底缺哪个文件"这条排障信息变模糊。 -->
+  <Match>
+    <Class name="org.fourfeetcat.core.react.ContextLoader"/>
+    <Bug pattern="CRLF_INJECTION_LOGS"/>
+  </Match>
 </FindBugsFilter>
