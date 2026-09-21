@@ -2,15 +2,17 @@
 
 本节对外暴露的都是 Java 跨模块契约（库形态，无 REST/CLI 面）。
 
-## 1. `ProviderService.chat`（provider 模块对外唯一入口）
+## 1. `SpringAiProviderServiceImpl.chat`（provider 模块对外唯一入口，实现 core 的 `LlmCaller` 端口）
 
 ```java
+// public class SpringAiProviderServiceImpl implements LlmCaller
 public ChatResponse chat(String sessionId, Profile profile,
                          List<ToolDescriptor> tools, Prompt prompt)
 ```
 
 - 语义：按 `profile.provider().name()` 从显式映射表取 `ChatModel`；未知名抛 `ProviderNotFoundException`（消息含所引用名）。options 统一在此构建：model/temperature 来自 Profile、`toolCallbacks` 为适配器翻译产物、`internalToolExecutionEnabled(false)`。成败都经 `LlmCallRecorder` 落审计后返回/上抛。
-- 调用方：第17节 ReActLoop。响应中的工具调用请求（`getToolCalls()`）原样交回，不执行。
+- 端口实现：签名与 core `LlmCaller` 逐字同形，Spring 把它作为 `LlmCaller` bean 注入第17节 ReActLoop（依赖倒置：provider ──▶ core，core 不反向依赖）。
+- 调用方：第17节 ReActLoop（经 `LlmCaller` 端口）。响应中的工具调用请求（`getToolCalls()`）原样交回，不执行。
 
 ## 2. `LlmCallRecorder`（core 端口，storage 实现，boot 装配）
 

@@ -42,8 +42,8 @@ class ProviderSmokeIT {
         (sessionId, provider, model, usage, success, errorMessage, durationMs) ->
             auditResults.add(success);
 
-    ProviderService service =
-        new ProviderService(Map.of("deepseek", deepseek), new ToolSchemaAdapter(), recorder);
+    SpringAiProviderServiceImpl service =
+        new SpringAiProviderServiceImpl(Map.of("deepseek", deepseek), new ToolSchemaAdapter(), recorder);
 
     Profile profile =
         new Profile(

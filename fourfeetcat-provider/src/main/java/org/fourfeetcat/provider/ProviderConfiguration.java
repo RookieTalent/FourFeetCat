@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.fourfeetcat.core.LlmCallRecorder;
+import org.fourfeetcat.core.react.LlmCaller;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.api.OpenAiApi;
@@ -35,7 +36,7 @@ public class ProviderConfiguration {
   public record ProviderSpec(String name, String baseUrl, String apiKey) {}
 
   @Bean
-  public ProviderService providerService(ProviderProperties properties, LlmCallRecorder audit) {
+  public LlmCaller providerService(ProviderProperties properties, LlmCallRecorder audit) {
     Map<String, ChatModel> providerMap = new HashMap<>();
     List<ProviderSpec> specs = properties.providers() == null ? List.of() : properties.providers();
     for (ProviderSpec spec : specs) {
@@ -46,6 +47,6 @@ public class ProviderConfiguration {
         throw new IllegalStateException("fourfeetcat.providers 里 provider 名重复: " + spec.name());
       }
     }
-    return new ProviderService(Map.copyOf(providerMap), new ToolSchemaAdapter(), audit);
+    return new SpringAiProviderServiceImpl(Map.copyOf(providerMap), new ToolSchemaAdapter(), audit);
   }
 }

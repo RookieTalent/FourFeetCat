@@ -29,13 +29,13 @@ import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.model.tool.ToolCallingChatOptions;
 
-class ProviderServiceTest {
+class SpringAiProviderServiceImplTest {
 
   private ChatModel deepseek;
   private ChatModel kimi;
   private ToolSchemaAdapter adapter;
   private LlmCallRecorder audit;
-  private ProviderService service;
+  private SpringAiProviderServiceImpl service;
 
   @BeforeEach
   void setUp() {
@@ -44,7 +44,8 @@ class ProviderServiceTest {
     adapter = mock(ToolSchemaAdapter.class);
     audit = mock(LlmCallRecorder.class);
     when(adapter.toSpringAiTools(any())).thenReturn(List.of());
-    service = new ProviderService(Map.of("deepseek", deepseek, "kimi", kimi), adapter, audit);
+    service =
+        new SpringAiProviderServiceImpl(Map.of("deepseek", deepseek, "kimi", kimi), adapter, audit);
   }
 
   @Test
@@ -115,8 +116,9 @@ class ProviderServiceTest {
   @DisplayName("带工具schema调用_请求里关闭了自动执行")
   void callWithToolSchema_disablesAutoExecution() {
     // 坑二的回归测试：用真实适配器翻译工具，一旦有人改回自动执行，这里立刻红
-    ProviderService realAdapterService =
-        new ProviderService(Map.of("deepseek", deepseek), new ToolSchemaAdapter(), audit);
+    SpringAiProviderServiceImpl realAdapterService =
+        new SpringAiProviderServiceImpl(
+            Map.of("deepseek", deepseek), new ToolSchemaAdapter(), audit);
     ChatResponse response = successfulResponse();
     when(deepseek.call(any(Prompt.class))).thenReturn(response);
 

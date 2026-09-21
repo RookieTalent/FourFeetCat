@@ -27,7 +27,7 @@ public interface SessionManager {
 ## 2. core / 循环调用模型的端口（`org.fourfeetcat.core.react`）
 
 ```java
-/** 与第16节 ProviderService.chat 同签名：装配处传 providerService::chat，前序节零改动。 */
+/** 与第16节 SpringAiProviderServiceImpl.chat 同签名：provider 模块的该实现类直接作为本端口 bean 注入，core 不反向依赖。 */
 @FunctionalInterface
 public interface LlmCaller {
   ChatResponse chat(String sessionId, Profile profile, List<ToolDescriptor> tools, Prompt prompt);

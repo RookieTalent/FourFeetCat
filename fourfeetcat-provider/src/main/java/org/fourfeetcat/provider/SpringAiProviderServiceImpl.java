@@ -5,30 +5,33 @@ import java.util.Map;
 import org.fourfeetcat.core.LlmCallRecorder;
 import org.fourfeetcat.core.ToolDescriptor;
 import org.fourfeetcat.core.profile.Profile;
+import org.fourfeetcat.core.react.LlmCaller;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.model.tool.ToolCallingChatOptions;
 
 /**
- * Provider 前台：Agent 与大模型之间的统一抽象层。按 Profile 声明的 provider 名从显式映射表 （宪法原则三）取
- * ChatModel，组装一次调用、成败都落审计（宪法原则五）。
+ * Provider 前台（{@link LlmCaller} 端口的实现）：Agent 与大模型之间的统一抽象层。按 Profile 声明的 provider 名从显式映射表
+ * （宪法原则三）取 ChatModel，组装一次调用、成败都落审计（宪法原则五）。
  *
- * <p>职责刻意划窄：挑对模型、发起一次调用、把结果拿回来。循环、工具执行、上下文都不归它管。
+ * <p>职责刻意划窄：挑对模型、发起一次调用、把结果拿回来。循环、工具执行、上下文都不归它管。实现 core 的 {@code LlmCaller}
+ * 端口（依赖倒置：provider 模块 ──▶ core，core 不反向依赖），Spring 把它作为 LlmCaller bean 注入 ReActLoop。
  */
-public class ProviderService {
+public class SpringAiProviderServiceImpl implements LlmCaller {
 
   private final Map<String, ChatModel> providerMap;
   private final ToolSchemaAdapter adapter;
   private final LlmCallRecorder audit;
 
-  public ProviderService(
+  public SpringAiProviderServiceImpl(
       Map<String, ChatModel> providerMap, ToolSchemaAdapter adapter, LlmCallRecorder audit) {
     this.providerMap = Map.copyOf(providerMap);
     this.adapter = adapter;
     this.audit = audit;
   }
 
+  @Override
   public ChatResponse chat(
       String sessionId, Profile profile, List<ToolDescriptor> tools, Prompt prompt) {
     Profile.ProviderConfig providerConfig = profile.provider();
