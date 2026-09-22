@@ -22,6 +22,11 @@
       <groupId>org.springframework.ai</groupId>
       <artifactId>spring-ai-model</artifactId>
     </dependency>
+    <!-- messages_json 的往返编解码（第18节）：随 spring-ai-model 已在类路径上，按仓库口径直依声明、不靠传递 -->
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+    </dependency>
     <!-- 持久化：SQLite（默认零配置）+ Spring Data JPA + Flyway（表结构只走迁移脚本，ddl-auto=none） -->
     <dependency>
       <groupId>org.springframework.boot</groupId>

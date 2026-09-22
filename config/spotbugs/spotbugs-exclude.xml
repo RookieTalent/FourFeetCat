@@ -21,12 +21,29 @@
     <Bug pattern="EI_EXPOSE_REP,EI_EXPOSE_REP2"/>
   </Match>
 
-  <!-- ProviderService.chat 的 catch 后原样重抛是课件第16节钦定形态（"调用失败也留痕，再把错误抛给
+  <!-- SpringAiProviderServiceImpl.chat 的 catch 后原样重抛是课件第16节钦定形态（"调用失败也留痕，再把错误抛给
        上层处理"）。精确重抛使 javac 在字节码 throws 属性标记 RuntimeException，触发该 Low 级形态
-       探测器；语义无变化（异常类型、消息原样上抛），属固有噪音。 -->
+       探测器；语义无变化（异常类型、消息原样上抛），属固有噪音。
+       注：本类由 ProviderService 改名而来（6a8a699），排除项随改名同步。 -->
   <Match>
-    <Class name="org.fourfeetcat.provider.ProviderService"/>
+    <Class name="org.fourfeetcat.provider.SpringAiProviderServiceImpl"/>
     <Bug pattern="THROWS_METHOD_THROWS_RUNTIMEEXCEPTION"/>
+  </Match>
+
+  <!-- CliChannel 持有外部注入的 InputStream/PrintStream：流不可拷贝，EI_EXPOSE_REP2 无从消解。
+       注入只为让 /quit 与空行两条分支有机器守卫（CliChannelTest）——交互壳的全部价值就是读写这两个流，
+       "防御性拷贝"在这里没有语义。 -->
+  <Match>
+    <Class name="org.fourfeetcat.channel.cli.CliChannel"/>
+    <Bug pattern="EI_EXPOSE_REP,EI_EXPOSE_REP2"/>
+  </Match>
+
+  <!-- INFORMATION_EXPOSURE_THROUGH_AN_ERROR_MESSAGE：命中的是 CLI 的统一报错出口。那条规则的场景是
+       "错误信息回给未授权的远端调用方"；CLI 的 stderr 只给敲命令的这一个人看，不存在这一层。
+       把异常消息泛化成"操作失败"反而让操作者无从排障（key 没配 / Agent 不存在 / 模型端 401 全靠这行）。 -->
+  <Match>
+    <Class name="org.fourfeetcat.cli.CommandErrors"/>
+    <Bug pattern="INFORMATION_EXPOSURE_THROUGH_AN_ERROR_MESSAGE"/>
   </Match>
 
   <!-- CRLF_INJECTION_LOGS：profile 包只在本地工作区错误路径记录文件名与异常消息，输入非

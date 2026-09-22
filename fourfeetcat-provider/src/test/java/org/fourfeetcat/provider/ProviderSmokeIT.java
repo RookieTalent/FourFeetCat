@@ -43,7 +43,8 @@ class ProviderSmokeIT {
             auditResults.add(success);
 
     SpringAiProviderServiceImpl service =
-        new SpringAiProviderServiceImpl(Map.of("deepseek", deepseek), new ToolSchemaAdapter(), recorder);
+        new SpringAiProviderServiceImpl(
+            Map.of("deepseek", deepseek), new ToolSchemaAdapter(), recorder);
 
     Profile profile =
         new Profile(

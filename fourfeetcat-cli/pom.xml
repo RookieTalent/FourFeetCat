@@ -17,5 +17,30 @@
       <groupId>org.fourfeetcat</groupId>
       <artifactId>fourfeetcat-core</artifactId>
     </dependency>
+    <!-- chat 的交互实现在 channel-cli（技术方案 §8.4：CliChannel 归该模块） -->
+    <dependency>
+      <groupId>org.fourfeetcat</groupId>
+      <artifactId>fourfeetcat-channel-cli</artifactId>
+    </dependency>
+    <!-- session list 读会话仓储 -->
+    <dependency>
+      <groupId>org.fourfeetcat</groupId>
+      <artifactId>fourfeetcat-storage</artifactId>
+    </dependency>
+    <!-- 命令行框架：子命令、参数、帮助信息、报错提示都交给它（课件"别自己撸 args[]"） -->
+    <dependency>
+      <groupId>info.picocli</groupId>
+      <artifactId>picocli</artifactId>
+    </dependency>
+    <!-- provider list / status 读打包内全局层声明（轻命令不启动容器，YAML 得自己解） -->
+    <dependency>
+      <groupId>org.yaml</groupId>
+      <artifactId>snakeyaml</artifactId>
+    </dependency>
+    <!-- WebApplicationType / ConfigurableApplicationContext：重命令按需取容器，但不自己持有应用配置类 -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot</artifactId>
+    </dependency>
   </dependencies>
 </project>
