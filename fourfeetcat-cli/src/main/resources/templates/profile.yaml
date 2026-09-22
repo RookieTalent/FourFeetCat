@@ -1,0 +1,17 @@
+# Agent 配置：改完下一轮立即生效（每次组装 prompt 都现读，无缓存）
+name: __NAME__
+description: __DESCRIPTION__
+identity:
+  agent_name: 四脚猫
+  prompt: 你是一个乐于助人的助手，回答简洁、直接。
+provider:
+  name: deepseek
+  model: deepseek-v4-flash
+tools: []
+bootstrap:
+  - AGENTS.md
+  - SOUL.md
+  - USER.md
+settings:
+  max_iterations: 10
+  max_history_turns: 20

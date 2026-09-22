@@ -149,3 +149,18 @@ public interface SessionManager {
 - 空实现对非空工具名单**报错而不是静默返回空**：Profile 声明了工具却拿不到描述，模型会无从下手；报错才查得动（对齐 `ToolTable` 接口既有注释的口径）。
 
 **Alternatives considered**: 把装配放 `fourfeetcat-cli`——那会让 cli 依赖 provider 模块（`LlmCaller` 的 Bean 来自 provider），入口层反向耦合业务能力域，否。
+
+---
+
+## D10 init 模板放资源文件，不放 Java 常量（2026-09-22 补记）
+
+**Decision**: `init` / `profile create` 生成的 6 份模板正文（`profile.yaml`、`AGENTS.md`、`SOUL.md`、`USER.md`、`MEMORY.md`、`mcp_servers.yaml`）落在 `fourfeetcat-cli/src/main/resources/templates/`，`Workspace` 只负责读资源 + 填占位符（`__NAME__` / `__DESCRIPTION__`）；模板缺失时响亮报错，不回落空内容。
+
+**Rationale**:
+- 依据技术方案 §8.1「创建目录、**写默认模板**、生成默认 Profile」与 §9.3「用户可直接编辑、git 跟踪」的配置/代码分离精神：模板是**内容**不是逻辑。
+- 模板正文是 YAML/Markdown，放资源里能拿到语法高亮与校验；改模板不必碰 Java，也避免 Java 文本块里的缩进被格式化工具扰动。
+- 占位符用 `replace` 而非 `String.format`：Agent 名是用户输入，含 `%` 时格式串会直接抛异常（实机验证：`profile create "weird%name"` 在改造前会炸）。
+
+**Alternatives considered**:
+- 保持 Java 文本块常量（本节初版）：省一次类路径读取，但把"内容"混进"逻辑"，且改模板要改 Java —— 主公以技术方案为依据否决。
+- 把模板放到工作区外部可配置目录（运维可改）：那属于扩展阶段的"模板外置"，核心阶段不引入。模板在 jar 内，改它仍需重新打包，这一点两案相同。

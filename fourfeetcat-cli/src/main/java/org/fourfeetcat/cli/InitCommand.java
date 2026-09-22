@@ -41,15 +41,15 @@ class InitCommand implements Runnable {
     kept.forEach(item -> System.out.println("  保留: " + item));
   }
 
-  /** 相对工作区根的路径 → 内容；顺序即创建顺序（默认 Agent 排头）。 */
+  /** 相对工作区根的路径 → 模板正文；顺序即创建顺序（默认 Agent 排头）。 */
   private static Map<String, String> templates() {
     Map<String, String> files = new LinkedHashMap<>();
     files.put(Workspace.DEFAULT_PROFILE_FILE, Workspace.profileTemplate("default"));
-    files.put(Workspace.MEMORY_FILE, Workspace.memoryTemplate());
-    files.put(Workspace.MCP_SERVERS_FILE, Workspace.mcpServersTemplate());
-    files.put(Workspace.AGENTS_FILE, Workspace.agentsTemplate());
-    files.put(Workspace.SOUL_FILE, Workspace.soulTemplate());
-    files.put(Workspace.USER_FILE, Workspace.userTemplate());
+    files.put(Workspace.MEMORY_FILE, Workspace.template("MEMORY.md"));
+    files.put(Workspace.MCP_SERVERS_FILE, Workspace.template(Workspace.MCP_SERVERS_FILE));
+    files.put(Workspace.AGENTS_FILE, Workspace.template(Workspace.AGENTS_FILE));
+    files.put(Workspace.SOUL_FILE, Workspace.template(Workspace.SOUL_FILE));
+    files.put(Workspace.USER_FILE, Workspace.template(Workspace.USER_FILE));
     return files;
   }
 }

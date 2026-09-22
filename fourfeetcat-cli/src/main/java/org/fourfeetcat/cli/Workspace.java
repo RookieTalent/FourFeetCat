@@ -1,20 +1,25 @@
 package org.fourfeetcat.cli;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
 /**
- * 工作区路径与模板（包内私有）。
+ * 工作区路径与模板读取（包内私有）。
  *
- * <p>轻命令全程不碰容器，路径与模板只能自己算；口径与 application.yaml 的数据源、boot 的装配保持一致—— {@code FOURFEETCAT_ROOT}
- * 可整体搬移工作区。
+ * <p>轻命令全程不碰容器，路径只能自己算；口径与 application.yaml 的数据源、boot 的装配保持一致—— {@code FOURFEETCAT_ROOT} 可整体搬移工作区。
+ *
+ * <p>模板正文放在 {@code resources/templates/}（技术方案 §8.1「创建目录、写默认模板、生成默认 Profile」）：模板是**内容**
+ * 不是逻辑，YAML/Markdown 该在资源里带语法高亮与校验，改模板也不必碰 Java。
  */
 final class Workspace {
 
   private static final String ROOT_ENV = "FOURFEETCAT_ROOT";
   private static final String DEFAULT_ROOT = ".fourfeetcat";
+  private static final String TEMPLATE_DIR = "/templates/";
+  private static final String PROFILE_TEMPLATE = "profile.yaml";
 
   /** Agent 配置目录：本阶段 Profile 的定义源（"一个目录 = 一个 Agent"的形态归后续节）。 */
   static final String PROFILES_DIR = "profiles";
@@ -30,62 +35,6 @@ final class Workspace {
 
   private static final String NAME_PLACEHOLDER = "__NAME__";
   private static final String DESCRIPTION_PLACEHOLDER = "__DESCRIPTION__";
-
-  /** 默认 Agent：provider.name 必须是全局层已声明的名字，否则加载时会被判非法（课件第16节的校验）。 */
-  private static final String PROFILE_TEMPLATE =
-      """
-      # Agent 配置：改完下一轮立即生效（每次组装 prompt 都现读，无缓存）
-      name: __NAME__
-      description: __DESCRIPTION__
-      identity:
-        agent_name: 四脚猫
-        prompt: 你是一个乐于助人的助手，回答简洁、直接。
-      provider:
-        name: deepseek
-        model: deepseek-v4-flash
-      tools: []
-      bootstrap:
-        - AGENTS.md
-        - SOUL.md
-        - USER.md
-      settings:
-        max_iterations: 10
-        max_history_turns: 20
-      """;
-
-  private static final String AGENTS_TEMPLATE =
-      """
-      # 项目说明
-
-      在这里写这个 Agent 所在的业务背景、术语、约定。每轮对话都会全量注入。
-      """;
-
-  private static final String SOUL_TEMPLATE =
-      """
-      # 人格
-
-      在这里定义 Agent 的语气与性格。每轮对话都会全量注入。
-      """;
-
-  private static final String USER_TEMPLATE =
-      """
-      # 用户偏好
-
-      用户手写的初始设定，FourFeetCat 只读不写（Agent 的成长记录写 MEMORY.md）。
-      """;
-
-  private static final String MEMORY_TEMPLATE =
-      """
-      # 长期记忆
-
-      Agent 通过 save_memory 工具写入，不要手动改。
-      """;
-
-  private static final String MCP_SERVERS_TEMPLATE =
-      """
-      # MCP server 配置（第20节起按 Profile 的 mcp_servers 名单连接）
-      servers: []
-      """;
 
   private Workspace() {}
 
@@ -104,32 +53,24 @@ final class Workspace {
   /**
    * 新建的 Agent 配置：名字进 name 字段，其余用默认模板。
    *
-   * <p>用占位符替换而不是 {@code String.format}：Agent 名是用户输入，含 {@code %} 时格式串会直接抛异常（YAML 模板里也 没有需要格式化的东西）。
+   * <p>用占位符替换而不是 {@code String.format}：Agent 名是用户输入，含 {@code %} 时格式串会直接抛异常（模板里也没有 需要格式化的东西）。
    */
   static String profileTemplate(String name) {
-    return PROFILE_TEMPLATE
+    return template(PROFILE_TEMPLATE)
         .replace(NAME_PLACEHOLDER, name)
         .replace(DESCRIPTION_PLACEHOLDER, "default".equals(name) ? "默认 Agent" : name);
   }
 
-  static String agentsTemplate() {
-    return AGENTS_TEMPLATE;
-  }
-
-  static String soulTemplate() {
-    return SOUL_TEMPLATE;
-  }
-
-  static String userTemplate() {
-    return USER_TEMPLATE;
-  }
-
-  static String memoryTemplate() {
-    return MEMORY_TEMPLATE;
-  }
-
-  static String mcpServersTemplate() {
-    return MCP_SERVERS_TEMPLATE;
+  /** 读打包内的模板正文；模板是 jar 的一部分，缺了就是打包错了，必须响亮报错而不是回落到空内容。 */
+  static String template(String fileName) {
+    try (InputStream stream = Workspace.class.getResourceAsStream(TEMPLATE_DIR + fileName)) {
+      if (stream == null) {
+        throw new IllegalStateException("打包内找不到模板 " + TEMPLATE_DIR + fileName);
+      }
+      return new String(stream.readAllBytes(), StandardCharsets.UTF_8);
+    } catch (IOException e) {
+      throw new IllegalStateException("读取模板失败: " + fileName + "（" + e.getMessage() + "）", e);
+    }
   }
 
   /** 已存在就不动：init 要幂等、profile create 不许覆盖既有 Agent。返回是否真的写了。 */
