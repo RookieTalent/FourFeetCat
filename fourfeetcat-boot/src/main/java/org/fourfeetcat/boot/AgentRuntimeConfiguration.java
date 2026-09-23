@@ -21,6 +21,7 @@ import org.fourfeetcat.core.tool.ToolTable;
 import org.fourfeetcat.provider.ProviderConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.client.RestClient;
 
 /**
  * 运行期装配（第18节）：把 Profile 加载、上下文组装、循环、编排串起来，让 {@code chat} 能真跑通一轮对话。
@@ -47,6 +48,17 @@ public class AgentRuntimeConfiguration {
     List<Profile> loaded =
         new ProfileLoader(knownProviders).load(workspaceRoot().resolve("profiles"));
     return new ProfileRegistry(loaded);
+  }
+
+  /**
+   * 出站通知实现所需的同步 HTTP 客户端（第19节）。
+   *
+   * <p>Boot 自动配置只提供 {@code RestClient.Builder}，而实现类按课件形态收的是 {@code RestClient}——在这里用 Builder 造
+   * 出可注入的实例，那个 {@code @Component} 才能被容器实例化（否则启动期报"找不到 RestClient 类型的 Bean"）。
+   */
+  @Bean
+  public RestClient restClient(RestClient.Builder builder) {
+    return builder.build();
   }
 
   /** 启动信息与 Skill 元数据每次现读、无缓存（技术方案 §8.3）。 */
