@@ -12,8 +12,8 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 import org.fourfeetcat.core.ToolDescriptor;
-import org.fourfeetcat.core.tool.ToolExecutionResult;
 import org.fourfeetcat.core.tool.ToolInvocationRecorder;
+import org.fourfeetcat.core.tool.ToolResult;
 import org.fourfeetcat.core.tool.ToolTable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -39,9 +39,9 @@ class ToolExecutorTest {
   @DisplayName("执行成功_审计落success为true并带工具名入参结果耗时")
   void executionSuccess_auditsSuccessWithNameInputAndResult() {
     when(toolTable.execute("http_get", "{\"url\":\"https://example.com\"}"))
-        .thenReturn(ToolExecutionResult.success("{\"temp\":10}"));
+        .thenReturn(ToolResult.success("{\"temp\":10}"));
 
-    ToolExecutionResult result =
+    ToolResult result =
         executor.execute(SESSION_ID, call("http_get", "{\"url\":\"https://example.com\"}"));
 
     assertThat(result.success()).isTrue();
@@ -60,9 +60,9 @@ class ToolExecutorTest {
   @Test
   @DisplayName("执行失败_审计也落一条success为false并带原因")
   void executionFailure_auditsSuccessFalseWithReason() {
-    when(toolTable.execute(any(), any())).thenReturn(ToolExecutionResult.failure("连接超时", true));
+    when(toolTable.execute(any(), any())).thenReturn(ToolResult.failure("连接超时", true));
 
-    ToolExecutionResult result = executor.execute(SESSION_ID, call("http_get", "{}"));
+    ToolResult result = executor.execute(SESSION_ID, call("http_get", "{}"));
 
     assertThat(result.success()).isFalse();
     assertThat(result.retryable()).isTrue();
@@ -77,7 +77,7 @@ class ToolExecutorTest {
   void tableThrows_reasonGoesToAuditAndResult() {
     when(toolTable.execute(any(), any())).thenThrow(new IllegalStateException("工具表不可用"));
 
-    ToolExecutionResult result = executor.execute(SESSION_ID, call("http_get", "{}"));
+    ToolResult result = executor.execute(SESSION_ID, call("http_get", "{}"));
 
     assertThat(result.success()).isFalse();
     assertThat(result.errorMessage()).contains("工具表不可用");

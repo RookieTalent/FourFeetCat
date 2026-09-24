@@ -18,7 +18,7 @@ import java.util.Map;
 import org.fourfeetcat.core.ToolDescriptor;
 import org.fourfeetcat.core.profile.Profile;
 import org.fourfeetcat.core.session.Session;
-import org.fourfeetcat.core.tool.ToolExecutionResult;
+import org.fourfeetcat.core.tool.ToolResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -70,8 +70,7 @@ class ReActLoopTest {
   void toolCall_executesToolAndFeedsResultIntoNextRound() {
     when(llmCaller.chat(any(), any(), any(), any()))
         .thenReturn(toolCallResponse(httpGetCall()), textResponse("10 度，穿外套"));
-    when(toolExecutor.execute(any(), any()))
-        .thenReturn(ToolExecutionResult.success("{\"temp\":10}"));
+    when(toolExecutor.execute(any(), any())).thenReturn(ToolResult.success("{\"temp\":10}"));
 
     String reply = loop.run(session, "今天穿什么", profile(10));
 
@@ -88,8 +87,7 @@ class ReActLoopTest {
   void eachRound_accumulatesResponseAndToolResult() {
     when(llmCaller.chat(any(), any(), any(), any()))
         .thenReturn(toolCallResponse(httpGetCall()), textResponse("10 度，穿外套"));
-    when(toolExecutor.execute(any(), any()))
-        .thenReturn(ToolExecutionResult.success("{\"temp\":10}"));
+    when(toolExecutor.execute(any(), any())).thenReturn(ToolResult.success("{\"temp\":10}"));
 
     loop.run(session, "今天穿什么", profile(10));
 
@@ -113,7 +111,7 @@ class ReActLoopTest {
         new AssistantMessage.ToolCall("call-2", "function", "read_file", "{}");
     when(llmCaller.chat(any(), any(), any(), any()))
         .thenReturn(toolCallResponse(first, second), textResponse("好了"));
-    when(toolExecutor.execute(any(), any())).thenReturn(ToolExecutionResult.success("{}"));
+    when(toolExecutor.execute(any(), any())).thenReturn(ToolResult.success("{}"));
 
     loop.run(session, "一起查", profile(10));
 
@@ -129,7 +127,7 @@ class ReActLoopTest {
   void toolFailure_failureReasonFeedsBackIntoConversation() {
     when(llmCaller.chat(any(), any(), any(), any()))
         .thenReturn(toolCallResponse(httpGetCall()), textResponse("那我看不了天气了"));
-    when(toolExecutor.execute(any(), any())).thenReturn(ToolExecutionResult.failure("连接超时", true));
+    when(toolExecutor.execute(any(), any())).thenReturn(ToolResult.failure("连接超时", true));
 
     String reply = loop.run(session, "今天穿什么", profile(10));
 
@@ -182,7 +180,7 @@ class ReActLoopTest {
   void loopingToolCalls_stopsExactlyAtMaxIterations() {
     when(llmCaller.chat(any(), any(), any(), any()))
         .thenReturn(toolCallResponse(httpGetCall())); // 每轮都要调工具，永不收敛
-    when(toolExecutor.execute(any(), any())).thenReturn(ToolExecutionResult.success("{}"));
+    when(toolExecutor.execute(any(), any())).thenReturn(ToolResult.success("{}"));
 
     String reply = loop.run(session, "查天气", profile(10));
 
@@ -194,7 +192,7 @@ class ReActLoopTest {
   @DisplayName("最大轮数可配置_按配置生效")
   void maxIterations_isConfigurableFromProfile() {
     when(llmCaller.chat(any(), any(), any(), any())).thenReturn(toolCallResponse(httpGetCall()));
-    when(toolExecutor.execute(any(), any())).thenReturn(ToolExecutionResult.success("{}"));
+    when(toolExecutor.execute(any(), any())).thenReturn(ToolResult.success("{}"));
 
     loop.run(session, "查天气", profile(3));
 
@@ -205,7 +203,7 @@ class ReActLoopTest {
   @DisplayName("最大轮数配置缺失或非法_回落到默认十轮")
   void invalidMaxIterations_fallsBackToDefault() {
     when(llmCaller.chat(any(), any(), any(), any())).thenReturn(toolCallResponse(httpGetCall()));
-    when(toolExecutor.execute(any(), any())).thenReturn(ToolExecutionResult.success("{}"));
+    when(toolExecutor.execute(any(), any())).thenReturn(ToolResult.success("{}"));
 
     loop.run(
         new Session(SESSION_ID, "ops-agent", "cli", "u-1"), "查天气", profileWithSettings(Map.of()));

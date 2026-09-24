@@ -68,4 +68,44 @@
     <Class name="org.fourfeetcat.core.react.ContextLoader"/>
     <Bug pattern="CRLF_INJECTION_LOGS"/>
   </Match>
+
+  <!-- 第20节：内置 HTTP 工具与 MCP 适配器构造注入框架客户端（RestClient / McpSyncClient）。
+       与 WebhookNotifyAdapter 同因——被注入的是共享的框架对象，不可拷贝、也不该拷贝；
+       "防御性拷贝"在这里没有语义，构造注入是本仓既定的依赖注入形态。 -->
+  <Match>
+    <Class name="org.fourfeetcat.tool.builtin.HttpTools"/>
+    <Bug pattern="EI_EXPOSE_REP,EI_EXPOSE_REP2"/>
+  </Match>
+  <Match>
+    <Class name="org.fourfeetcat.tool.mcp.McpToolAdapter"/>
+    <Bug pattern="EI_EXPOSE_REP,EI_EXPOSE_REP2"/>
+  </Match>
+
+  <!-- COMMAND_INJECTION：ShellTools 是**故意**执行外部命令的工具，FindSecBugs 无从知道上游有白名单。
+       该工具的设计恰好是该规则要防的两件事的反面：① 参数以 argv 数组直传，不经 shell 解释（`;`、`|` 只是
+       普通字符）；② 方法体第一行就是 sandbox.enforce(SHELL_COMMAND, command)，命令须在管理员配置的
+       可执行文件白名单内，不在即抛异常、进程根本不启动。真正的隔离强度由沙箱档位决定（白名单为"劝阻级"
+       防线，见 docs/TechnicalSolution.md §6.7），不因本条排除而改变。
+       ⚠️ 复核提示：若将来有人把这里的 argv 直传改成拼接字符串交给 shell，本条排除就成了漏洞掩护——改那种
+       写法时必须同时删除本条。 -->
+  <Match>
+    <Class name="org.fourfeetcat.tool.builtin.ShellTools"/>
+    <Bug pattern="COMMAND_INJECTION"/>
+  </Match>
+
+  <!-- CRLF_INJECTION_LOGS：MCP 客户端的告警只记 mcp_servers.yaml 里的服务名与传输方式——该文件由部署者
+       自管，不是网络或对话用户可控的输入；与 profile 包同款理由。sanitizing 会让"哪个 server 没连上"
+       这条唯一的排障线索变模糊。 -->
+  <Match>
+    <Class name="org.fourfeetcat.tool.mcp.McpClientService"/>
+    <Bug pattern="CRLF_INJECTION_LOGS"/>
+  </Match>
+
+  <!-- THROWS_METHOD_THROWS_RUNTIMEEXCEPTION：CallbackTool.execute 刻意把 Spring AI 包装过的异常拆开重抛。
+       不拆的话，沙箱拦截的原因会被埋进"调用方法失败"这类包装文案里，而审计表的失败原因是给人查事故用的。
+       与 SpringAiProviderServiceImpl 的排除同因（精确重抛触发该 Low 级形态探测器，语义无变化）。 -->
+  <Match>
+    <Class name="org.fourfeetcat.tool.registry.AnnotatedToolAdapter$CallbackTool"/>
+    <Bug pattern="THROWS_METHOD_THROWS_RUNTIMEEXCEPTION"/>
+  </Match>
 </FindBugsFilter>

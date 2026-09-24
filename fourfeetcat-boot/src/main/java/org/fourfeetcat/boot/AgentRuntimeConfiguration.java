@@ -1,10 +1,11 @@
 package org.fourfeetcat.boot;
 
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.fourfeetcat.core.ToolDescriptor;
+import org.fourfeetcat.core.notify.NotifyChannelSource;
 import org.fourfeetcat.core.profile.Profile;
 import org.fourfeetcat.core.profile.ProfileLoader;
 import org.fourfeetcat.core.profile.ProfileRegistry;
@@ -15,10 +16,18 @@ import org.fourfeetcat.core.react.PromptBuilder;
 import org.fourfeetcat.core.react.ReActLoop;
 import org.fourfeetcat.core.react.ToolExecutor;
 import org.fourfeetcat.core.session.SessionManager;
-import org.fourfeetcat.core.tool.ToolExecutionResult;
 import org.fourfeetcat.core.tool.ToolInvocationRecorder;
-import org.fourfeetcat.core.tool.ToolTable;
 import org.fourfeetcat.provider.ProviderConfiguration;
+import org.fourfeetcat.tool.builtin.FileTools;
+import org.fourfeetcat.tool.builtin.HttpTools;
+import org.fourfeetcat.tool.builtin.ShellTools;
+import org.fourfeetcat.tool.mcp.McpClientService;
+import org.fourfeetcat.tool.mcp.McpServerConfigLoader;
+import org.fourfeetcat.tool.notify.NotifyChannelAdapter;
+import org.fourfeetcat.tool.notify.NotifyTools;
+import org.fourfeetcat.tool.registry.ToolRegistry;
+import org.fourfeetcat.tool.sandbox.PermissiveSandbox;
+import org.fourfeetcat.tool.sandbox.Sandbox;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestClient;
@@ -28,10 +37,17 @@ import org.springframework.web.client.RestClient;
  *
  * <p>四个跨模块端口 Bean（{@code LlmCaller} / {@code LlmCallRecorder} / {@code ToolInvocationRecorder} /
  * {@code SessionManager}）全部复用既有实现——provider 模块的 {@code ProviderConfiguration} 与 storage 的两个
- * {@code @Component}，本节零改动。
+ * {@code @Component}。第20节再加四个：{@code Sandbox}（本节为临时装配）、{@code ToolRegistry}、 {@code
+ * McpServerConfigLoader} 与 {@code McpClientService}。
  */
 @Configuration
 public class AgentRuntimeConfiguration {
+
+  /** shell 单条命令的执行上限：课件没给数，取 30 秒这个工程默认值。 */
+  private static final Duration SHELL_TIMEOUT = Duration.ofSeconds(30);
+
+  /** shell 输出上限：一次把几十兆日志灌进模型上下文，等于把这一轮对话直接撑爆。 */
+  private static final int SHELL_MAX_OUTPUT_CHARS = 8000;
 
   /** 工作区根：FOURFEETCAT_ROOT 可整体搬移（与 application.yaml 的数据源路径同口径）。 */
   static Path workspaceRoot() {
@@ -73,15 +89,64 @@ public class AgentRuntimeConfiguration {
     return new PromptBuilder(contextLoader);
   }
 
-  /** 工具注册归第20节；本节只留最小接线，不引入任何工具实现。 */
+  /**
+   * 沙箱（第20节）。
+   *
+   * <p>⚠️ 这里挂的是**临时装配**：它不做任何校验，只为让沙箱节之前已注册的工具能跑通。规则本体归沙箱节，届时把这个 Bean 换成白名单实现即可——接口与调用方一行不改。见
+   * {@link PermissiveSandbox} 的类注释。
+   */
   @Bean
-  public ToolTable toolTable() {
-    return new UnregisteredToolTable();
+  public Sandbox sandbox() {
+    return new PermissiveSandbox();
+  }
+
+  /** MCP 配置加载器（第20节）：读工作区里的 {@code mcp_servers.yaml}——工作区路径的口径只在 boot 里有一处。 */
+  @Bean
+  public McpServerConfigLoader mcpServerConfigLoader() {
+    return new McpServerConfigLoader(workspaceRoot());
+  }
+
+  /**
+   * 外部工具服务的接入（第20节）。
+   *
+   * <p>它是 Bean 而不是就地 new 的对象，因为它持有的是子进程连接：停机时得有人调它的 {@code close()} 收尾， {@link AutoCloseable}
+   * 就是容器认的销毁方法，不必另配 {@code destroyMethod}。
+   */
+  @Bean
+  public McpClientService mcpClientService(McpServerConfigLoader loader) {
+    return new McpClientService(loader);
+  }
+
+  /**
+   * 工具注册表（第20节）：三种来源的工具都注册进它，{@code ToolExecutor} 只认这一个下游。
+   *
+   * <p>按 Profile 的工具名清单过滤在该类里完成——注册表全量持有，Agent 各取自己声明的那批。
+   *
+   * <p>内置工具是在这里"一行挂一个"接进来的：沙箱检查位、{@code tool_invocations} 审计、按清单过滤全在管道的固定位置上， 每加一个工具都不需要动它们。
+   */
+  @Bean
+  public ToolRegistry toolRegistry(
+      Sandbox sandbox,
+      RestClient restClient,
+      NotifyChannelAdapter notifyAdapter,
+      NotifyChannelSource notifyChannels,
+      McpClientService mcpClientService) {
+    ToolRegistry registry = new ToolRegistry();
+    registry.registerAnnotated(new FileTools(sandbox));
+    registry.registerAnnotated(new ShellTools(sandbox, SHELL_TIMEOUT, SHELL_MAX_OUTPUT_CHARS));
+    registry.registerAnnotated(new HttpTools(sandbox, restClient));
+    // 第19节欠的那笔账在这里还上：推送能力从"契约 + 实现"变成 Agent 在对话里真的能调的工具
+    registry.registerAnnotated(new NotifyTools(sandbox, notifyAdapter, notifyChannels));
+
+    // 外部工具服务（第20节）：启动时连接配置里声明的全部，把它暴露的工具也注册进来。
+    // 连不上的只记 WARN 跳过——外部依赖失联不该拖垮底座自己的启动（连接范围与隔离见 McpClientService）。
+    mcpClientService.connectAll(registry);
+    return registry;
   }
 
   @Bean
-  public ToolExecutor toolExecutor(ToolTable toolTable, ToolInvocationRecorder audit) {
-    return new ToolExecutor(toolTable, audit);
+  public ToolExecutor toolExecutor(ToolRegistry toolRegistry, ToolInvocationRecorder audit) {
+    return new ToolExecutor(toolRegistry, audit);
   }
 
   @Bean
@@ -94,28 +159,5 @@ public class AgentRuntimeConfiguration {
   public AgentService agentService(
       ProfileRegistry profileRegistry, ReActLoop reActLoop, SessionManager sessionManager) {
     return new AgentService(profileRegistry, reActLoop, sessionManager);
-  }
-
-  /**
-   * 本节的最小工具表：一个工具都没有。
-   *
-   * <p>Profile 声明了工具却拿不到描述时**报错而不是静默少给**——模型会因此无从下手，静默失败最难查。
-   */
-  private static final class UnregisteredToolTable implements ToolTable {
-
-    private static final String REASON = "（工具注册归第20节）";
-
-    @Override
-    public List<ToolDescriptor> descriptors(List<String> names) {
-      if (!names.isEmpty()) {
-        throw new IllegalStateException("工具未注册: " + names + REASON);
-      }
-      return List.of();
-    }
-
-    @Override
-    public ToolExecutionResult execute(String toolName, String inputJson) {
-      throw new IllegalStateException("工具未注册: " + toolName + REASON);
-    }
   }
 }

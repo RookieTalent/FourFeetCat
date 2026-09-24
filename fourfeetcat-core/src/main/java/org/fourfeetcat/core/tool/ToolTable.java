@@ -6,7 +6,11 @@ import org.fourfeetcat.core.ToolDescriptor;
 /**
  * 工具表（第17节课件原词）：从表里按名取工具描述、按名执行。
  *
- * <p>本节的最小执行端口：第20节立统一工具抽象（{@code OryxTool} + {@code ToolRegistry}）后由它取代，两个方法的 语义不变。
+ * <p>本节是最小占位；第20节立起统一工具抽象（{@link CatTool}）与真实注册表后，两个方法**语义一字不变**，实现方换成 {@code fourfeetcat-tool} 的
+ * {@code ToolRegistry}。
+ *
+ * <p>这个端口本身留在 core 不是凑合：{@code ToolExecutor} 在 core，而注册表按技术方案 §10 归 tool 模块——core 直接依赖 注册表就会与
+ * {@code tool → core} 成环。端口留在这里，依赖方向才对。
  */
 public interface ToolTable {
 
@@ -22,5 +26,5 @@ public interface ToolTable {
    *
    * @param inputJson 模型给出的调用参数（JSON 字符串原样，审计列 {@code input_json} 直接落它）
    */
-  ToolExecutionResult execute(String toolName, String inputJson);
+  ToolResult execute(String toolName, String inputJson);
 }

@@ -40,6 +40,9 @@
     <hibernate-community-dialects.version>6.6.53.Final</hibernate-community-dialects.version>
     <picocli.version>4.7.7</picocli.version>
     <logstash-encoder.version>9.0</logstash-encoder.version>
+    <!-- MCP 官方 Java SDK（第20节）：不在 spring-ai-bom 内，必须显式管版本。
+         0.17.0 = 锁定 BOM 里 spring-ai-mcp 1.1.2 所传递的同一版本（research.md D5）。 -->
+    <mcp-sdk.version>0.17.0</mcp-sdk.version>
 
     <!-- 质量插件版本 -->
     <maven-enforcer-plugin.version>3.6.1</maven-enforcer-plugin.version>
@@ -100,6 +103,13 @@
         <groupId>net.logstash.logback</groupId>
         <artifactId>logstash-logback-encoder</artifactId>
         <version>${logstash-encoder.version}</version>
+      </dependency>
+      <!-- MCP 客户端（第20节）：只用它的同步客户端与 stdio 传输；
+           不引 spring-ai-mcp，因为后者多带 webflux/webmvc 传输层，而本工程禁用 Spring AI 自动工具执行。 -->
+      <dependency>
+        <groupId>io.modelcontextprotocol.sdk</groupId>
+        <artifactId>mcp</artifactId>
+        <version>${mcp-sdk.version}</version>
       </dependency>
 
       <!-- 本项目模块间版本统一由父 pom 管理，子模块声明依赖不写版本 -->

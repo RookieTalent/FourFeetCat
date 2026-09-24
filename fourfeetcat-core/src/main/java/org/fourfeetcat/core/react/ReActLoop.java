@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.fourfeetcat.core.profile.Profile;
 import org.fourfeetcat.core.session.Session;
-import org.fourfeetcat.core.tool.ToolExecutionResult;
+import org.fourfeetcat.core.tool.ToolResult;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.ToolResponseMessage;
 import org.springframework.ai.chat.model.ChatResponse;
@@ -57,7 +57,7 @@ public class ReActLoop {
       Session session, List<AssistantMessage.ToolCall> toolCalls) {
     List<ToolResponseMessage.ToolResponse> responses = new ArrayList<>(toolCalls.size());
     for (AssistantMessage.ToolCall call : toolCalls) {
-      ToolExecutionResult result = toolExecutor.execute(session.getId(), call);
+      ToolResult result = toolExecutor.execute(session.getId(), call);
       responses.add(
           new ToolResponseMessage.ToolResponse(call.id(), call.name(), contentOf(result)));
     }
@@ -65,7 +65,7 @@ public class ReActLoop {
   }
 
   /** 失败也回填：原因进上下文，模型能据此换招，而不是撞上一堵没有信息的墙。 */
-  private static String contentOf(ToolExecutionResult result) {
+  private static String contentOf(ToolResult result) {
     return result.success() ? result.content() : result.errorMessage();
   }
 }

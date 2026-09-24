@@ -27,6 +27,11 @@
       <groupId>org.fourfeetcat</groupId>
       <artifactId>fourfeetcat-storage</artifactId>
     </dependency>
+    <!-- tool list 读工具注册表（第20节）——只读它的对外形态，不引入任何工具实现 -->
+    <dependency>
+      <groupId>org.fourfeetcat</groupId>
+      <artifactId>fourfeetcat-tool</artifactId>
+    </dependency>
     <!-- 命令行框架：子命令、参数、帮助信息、报错提示都交给它（课件"别自己撸 args[]"） -->
     <dependency>
       <groupId>info.picocli</groupId>

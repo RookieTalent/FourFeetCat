@@ -2,8 +2,8 @@ package org.fourfeetcat.core.react;
 
 import java.util.List;
 import org.fourfeetcat.core.ToolDescriptor;
-import org.fourfeetcat.core.tool.ToolExecutionResult;
 import org.fourfeetcat.core.tool.ToolInvocationRecorder;
+import org.fourfeetcat.core.tool.ToolResult;
 import org.fourfeetcat.core.tool.ToolTable;
 import org.springframework.ai.chat.messages.AssistantMessage;
 
@@ -27,15 +27,15 @@ public class ToolExecutor {
     return toolTable.descriptors(names);
   }
 
-  public ToolExecutionResult execute(String sessionId, AssistantMessage.ToolCall call) {
+  public ToolResult execute(String sessionId, AssistantMessage.ToolCall call) {
     long startedAt = System.currentTimeMillis();
-    ToolExecutionResult result;
+    ToolResult result;
     try {
       // 沙箱/白名单检查位：工具执行的唯一检查点，第24节 Sandbox 接线（宪法原则六）
       result = toolTable.execute(call.name(), call.arguments());
     } catch (RuntimeException e) {
       // 异常不吞：原因进审计、也进返回结果回填对话；一次工具失败不该炸掉整个循环
-      result = ToolExecutionResult.failure(reasonOf(e), false);
+      result = ToolResult.failure(reasonOf(e), false);
     }
     audit.record(
         sessionId,
