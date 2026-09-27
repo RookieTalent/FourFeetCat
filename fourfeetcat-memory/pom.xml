@@ -17,5 +17,26 @@
       <groupId>org.fourfeetcat</groupId>
       <artifactId>fourfeetcat-core</artifactId>
     </dependency>
+    <!-- 结构化库档（第22节）：memory_entries 的实体与仓储落 storage（与既有四张表同址同口径），
+         门面实现经它读写；memory → storage → core，无环。 -->
+    <dependency>
+      <groupId>org.fourfeetcat</groupId>
+      <artifactId>fourfeetcat-storage</artifactId>
+    </dependency>
+    <!-- 外部服务档（第22节）：同步 RestClient 调自托管记忆服务；版本由 Boot BOM 托管 -->
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-web</artifactId>
+    </dependency>
+    <!-- 记忆工具的 @Tool / @ToolParam（第20节同款注解管道，schema 由 Spring AI 生成——宪法原则二第二件事） -->
+    <dependency>
+      <groupId>org.springframework.ai</groupId>
+      <artifactId>spring-ai-model</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 </project>

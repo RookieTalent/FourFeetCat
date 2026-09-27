@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import org.fourfeetcat.core.memory.MemoryService;
 import org.fourfeetcat.core.profile.Profile;
 import org.fourfeetcat.core.session.Session;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,7 +36,7 @@ class PromptBuilderTest {
   @DisplayName("四部分按固定顺序组装_角色与启动信息在最前_记忆次之_历史最后")
   void parts_inFixedOrder() {
     session.appendUserMessage("今天穿什么");
-    PromptBuilder builder = new PromptBuilder(contextLoader, profile -> "用户偏好：只穿深色");
+    PromptBuilder builder = new PromptBuilder(contextLoader, memoryReturning("用户偏好：只穿深色"));
 
     Prompt prompt = builder.build(session, profile(20));
 
@@ -45,6 +46,39 @@ class PromptBuilderTest {
     assertThat(system).contains("运维小欧").contains("你是一个专业的运维助手").contains("启动信息：项目说明");
     assertThat(instructions.get(1).getText()).isEqualTo("用户偏好：只穿深色");
     assertThat(instructions.get(2)).isInstanceOf(UserMessage.class);
+  }
+
+  @Test
+  @DisplayName("门面返回空白_记忆段整体跳过_不注入空段落")
+  void blankMemory_skipsMemoryPart() {
+    session.appendUserMessage("在吗");
+    session.appendAssistantMessage(new AssistantMessage("在"));
+
+    PromptBuilder builder = new PromptBuilder(contextLoader, memoryReturning("   "));
+
+    List<Message> instructions = builder.build(session, profile(20)).getInstructions();
+
+    assertThat(instructions).hasSize(3); // system + user + assistant，没有空的记忆段
+    assertThat(instructions.get(0)).isInstanceOf(SystemMessage.class);
+    assertThat(instructions.get(1)).isInstanceOf(UserMessage.class);
+  }
+
+  @Test
+  @DisplayName("记忆段与会话历史各注入一次_不出现两份历史")
+  void memoryAndHistory_areInjectedExactlyOnce() {
+    session.appendUserMessage("第一轮");
+    session.appendAssistantMessage(new AssistantMessage("答一"));
+
+    PromptBuilder builder = new PromptBuilder(contextLoader, memoryReturning("## 核心记忆\n- 用户叫小王"));
+
+    List<Message> instructions = builder.build(session, profile(20)).getInstructions();
+
+    // 记忆段是独立的一条 system 消息，且里面只有长期记忆——会话历史由历史段独立负责
+    assertThat(instructions.get(1).getText()).isEqualTo("## 核心记忆\n- 用户叫小王");
+    assertThat(instructions.get(1).getText()).doesNotContain("第一轮");
+    long historyOccurrences =
+        instructions.stream().filter(message -> message.getText().contains("第一轮")).count();
+    assertThat(historyOccurrences).isEqualTo(1);
   }
 
   @Test
@@ -130,6 +164,13 @@ class PromptBuilderTest {
 
     assertThat(builder.build(session, profile(20)).getInstructions())
         .hasSize(builder.build(session, profile(20)).getInstructions().size());
+  }
+
+  /** 记忆门面替身：这里只关心它给出的那段文本；门面内部怎么拼由记忆模块自己的测试盯。 */
+  private static MemoryService memoryReturning(String context) {
+    MemoryService memoryService = mock(MemoryService.class);
+    when(memoryService.buildContext(any())).thenReturn(context);
+    return memoryService;
   }
 
   static Profile profile(int maxHistoryTurns) {

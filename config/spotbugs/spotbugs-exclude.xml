@@ -108,4 +108,21 @@
     <Class name="org.fourfeetcat.tool.registry.AnnotatedToolAdapter$CallbackTool"/>
     <Bug pattern="THROWS_METHOD_THROWS_RUNTIMEEXCEPTION"/>
   </Match>
+
+  <!-- EI_EXPOSE_REP/EI_EXPOSE_REP2：第22节的记忆门面与三档后端构造注入协作者（后端接口 / 仓储 / HTTP 客户端）。
+       与 WebhookNotifyAdapter、HttpTools、CliChannel 同因——被注入的是共享的框架对象或组合模式的协作者，
+       不可拷贝、也不该拷贝（拷贝一份 Spring Data 仓储代理或 HTTP 客户端没有语义）；构造注入是本仓既定的
+       依赖注入形态。 -->
+  <Match>
+    <Class name="org.fourfeetcat.memory.MemoryServiceImpl"/>
+    <Bug pattern="EI_EXPOSE_REP,EI_EXPOSE_REP2"/>
+  </Match>
+  <Match>
+    <Class name="org.fourfeetcat.memory.SqliteMemoryStore"/>
+    <Bug pattern="EI_EXPOSE_REP,EI_EXPOSE_REP2"/>
+  </Match>
+  <Match>
+    <Class name="org.fourfeetcat.memory.Mem0MemoryStore"/>
+    <Bug pattern="EI_EXPOSE_REP,EI_EXPOSE_REP2"/>
+  </Match>
 </FindBugsFilter>

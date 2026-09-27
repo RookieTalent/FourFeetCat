@@ -7,7 +7,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import org.fourfeetcat.tool.registry.PlainTextResultConverter;
+import org.fourfeetcat.core.tool.PlainTextResultConverter;
 import org.fourfeetcat.tool.sandbox.ActionType;
 import org.fourfeetcat.tool.sandbox.Sandbox;
 import org.fourfeetcat.tool.sandbox.SandboxAction;

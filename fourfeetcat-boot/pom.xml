@@ -39,6 +39,12 @@
       <groupId>org.fourfeetcat</groupId>
       <artifactId>fourfeetcat-tool</artifactId>
     </dependency>
+    <!-- 能力三（第22节起有实质内容：记忆门面、四档后端与 save/recall 工具）。
+         同第19节教训：不接上则新类既进不了容器也进不了 fat jar。 -->
+    <dependency>
+      <groupId>org.fourfeetcat</groupId>
+      <artifactId>fourfeetcat-memory</artifactId>
+    </dependency>
     <!-- 生产环境结构化 JSON 日志（logback-spring.xml prod profile） -->
     <dependency>
       <groupId>net.logstash.logback</groupId>

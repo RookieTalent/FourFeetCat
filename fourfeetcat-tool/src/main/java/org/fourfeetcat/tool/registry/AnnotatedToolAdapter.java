@@ -29,6 +29,11 @@ public final class AnnotatedToolAdapter {
    * @param beanWithToolMethods 带注解方法的 Bean（内置工具实例或业务方的深度集成 Bean）
    */
   public static List<CatTool> adapt(Object beanWithToolMethods) {
+    /*
+      MethodToolCallbackProvider 是一个 ToolCallbackProvider——给一堆
+    bean，它扫上面带 @Tool 的 public 方法，每个方法产出一个
+    ToolCallback（工具名、用途、参数 schema、调用逻辑四件套）
+       */
     ToolCallback[] callbacks =
         MethodToolCallbackProvider.builder()
             .toolObjects(beanWithToolMethods)

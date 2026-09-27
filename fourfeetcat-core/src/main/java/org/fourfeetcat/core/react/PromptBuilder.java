@@ -4,7 +4,7 @@ import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
+import org.fourfeetcat.core.memory.MemoryService;
 import org.fourfeetcat.core.profile.Profile;
 import org.fourfeetcat.core.session.Session;
 import org.springframework.ai.chat.messages.Message;
@@ -21,25 +21,26 @@ import org.springframework.ai.chat.prompt.Prompt;
 public class PromptBuilder {
 
   private final ContextLoader contextLoader;
-  private final Function<Profile, String> longTermMemory;
+  private final MemoryService memoryService;
 
   /** 未接记忆时用：长期记忆部分整体跳过。 */
   public PromptBuilder(ContextLoader contextLoader) {
-    this(contextLoader, profile -> null);
+    this(contextLoader, null);
   }
 
   /**
-   * @param longTermMemory 跨会话长期记忆的供给函数（第22节 MemoryService 就位后传方法引用）；返回空白串即视为未启用
+   * @param memoryService 记忆门面（第22节起由它供给长期记忆那一段）；传 {@code null} 即视为未启用记忆，该段整体跳过
    */
-  public PromptBuilder(ContextLoader contextLoader, Function<Profile, String> longTermMemory) {
+  public PromptBuilder(ContextLoader contextLoader, MemoryService memoryService) {
     this.contextLoader = contextLoader;
-    this.longTermMemory = longTermMemory;
+    this.memoryService = memoryService;
   }
 
   public Prompt build(Session session, Profile profile) {
     List<Message> messages = new ArrayList<>();
     messages.add(new SystemMessage(systemText(profile)));
-    String memory = longTermMemory.apply(profile);
+    // 长期记忆段：门面只给长期记忆（核心区全量 + 归档区截断后），会话历史由下面的历史段独立负责——两处都拼会出现两份历史
+    String memory = memoryService == null ? null : memoryService.buildContext(session);
     if (memory != null && !memory.isBlank()) {
       messages.add(new SystemMessage(memory));
     }

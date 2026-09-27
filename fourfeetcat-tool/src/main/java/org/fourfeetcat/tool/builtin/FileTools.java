@@ -7,7 +7,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
-import org.fourfeetcat.tool.registry.PlainTextResultConverter;
+import org.fourfeetcat.core.tool.PlainTextResultConverter;
 import org.fourfeetcat.tool.sandbox.ActionType;
 import org.fourfeetcat.tool.sandbox.Sandbox;
 import org.fourfeetcat.tool.sandbox.SandboxAction;

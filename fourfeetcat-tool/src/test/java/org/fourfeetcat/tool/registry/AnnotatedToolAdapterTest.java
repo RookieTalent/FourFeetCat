@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import org.fourfeetcat.core.tool.CatTool;
+import org.fourfeetcat.core.tool.PlainTextResultConverter;
 import org.fourfeetcat.core.tool.ToolResult;
 import org.fourfeetcat.tool.sandbox.SandboxViolationException;
 import org.junit.jupiter.api.DisplayName;

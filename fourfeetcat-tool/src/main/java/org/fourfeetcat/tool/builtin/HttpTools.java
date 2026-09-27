@@ -1,6 +1,6 @@
 package org.fourfeetcat.tool.builtin;
 
-import org.fourfeetcat.tool.registry.PlainTextResultConverter;
+import org.fourfeetcat.core.tool.PlainTextResultConverter;
 import org.fourfeetcat.tool.sandbox.ActionType;
 import org.fourfeetcat.tool.sandbox.Sandbox;
 import org.fourfeetcat.tool.sandbox.SandboxAction;

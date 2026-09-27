@@ -5,6 +5,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.fourfeetcat.core.memory.MemoryService;
 import org.fourfeetcat.core.notify.NotifyChannelSource;
 import org.fourfeetcat.core.profile.Profile;
 import org.fourfeetcat.core.profile.ProfileLoader;
@@ -17,7 +18,14 @@ import org.fourfeetcat.core.react.ReActLoop;
 import org.fourfeetcat.core.react.ToolExecutor;
 import org.fourfeetcat.core.session.SessionManager;
 import org.fourfeetcat.core.tool.ToolInvocationRecorder;
+import org.fourfeetcat.memory.LongTermMemoryStore;
+import org.fourfeetcat.memory.MarkdownMemoryStore;
+import org.fourfeetcat.memory.Mem0MemoryStore;
+import org.fourfeetcat.memory.MemoryServiceImpl;
+import org.fourfeetcat.memory.SqliteMemoryStore;
+import org.fourfeetcat.memory.builtin.MemoryTools;
 import org.fourfeetcat.provider.ProviderConfiguration;
+import org.fourfeetcat.storage.MemoryEntryRepository;
 import org.fourfeetcat.tool.builtin.FileTools;
 import org.fourfeetcat.tool.builtin.HttpTools;
 import org.fourfeetcat.tool.builtin.ShellTools;
@@ -28,6 +36,7 @@ import org.fourfeetcat.tool.notify.NotifyTools;
 import org.fourfeetcat.tool.registry.ToolRegistry;
 import org.fourfeetcat.tool.sandbox.PermissiveSandbox;
 import org.fourfeetcat.tool.sandbox.Sandbox;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestClient;
@@ -38,7 +47,8 @@ import org.springframework.web.client.RestClient;
  * <p>四个跨模块端口 Bean（{@code LlmCaller} / {@code LlmCallRecorder} / {@code ToolInvocationRecorder} /
  * {@code SessionManager}）全部复用既有实现——provider 模块的 {@code ProviderConfiguration} 与 storage 的两个
  * {@code @Component}。第20节再加四个：{@code Sandbox}（本节为临时装配）、{@code ToolRegistry}、 {@code
- * McpServerConfigLoader} 与 {@code McpClientService}。
+ * McpServerConfigLoader} 与 {@code McpClientService}。第22节再加两个：{@code LongTermMemoryStore}（按配置三选一）与
+ * {@code MemoryService}（门面）。
  */
 @Configuration
 public class AgentRuntimeConfiguration {
@@ -48,6 +58,12 @@ public class AgentRuntimeConfiguration {
 
   /** shell 输出上限：一次把几十兆日志灌进模型上下文，等于把这一轮对话直接撑爆。 */
   private static final int SHELL_MAX_OUTPUT_CHARS = 8000;
+
+  /** 长期记忆后端的取值字面量（第22节）：与 application.yaml 的 {@code memory.backend} 一一对应，集中一处便于核对。 */
+  private static final String BACKEND_MARKDOWN = "markdown";
+
+  private static final String BACKEND_SQLITE = "sqlite";
+  private static final String BACKEND_MEM0 = "mem0";
 
   /** 工作区根：FOURFEETCAT_ROOT 可整体搬移（与 application.yaml 的数据源路径同口径）。 */
   static Path workspaceRoot() {
@@ -83,10 +99,52 @@ public class AgentRuntimeConfiguration {
     return new ContextLoader(workspaceRoot());
   }
 
-  /** 长期记忆未启用：单参构造即"跳过记忆部分"，第22节传方法引用即可，组装器签名不变。 */
+  /**
+   * 长期记忆后端（第22节）：按 {@code memory.backend} 选一档——这是第21节那道"接口墙"的装配落点，换档只改配置。
+   *
+   * <p>取值不是这三者时**启动即拒并点名该取值**：把 {@code markdwon} 这类打字错静默当默认档，排查成本会转到几轮对话之后。
+   * 外部服务档被选中而地址为空时同样在装配期拒绝——地址没配就该立刻说，而不是等第一次对话才在调用链深处报错。
+   *
+   * <p>工作区根的口径只有这里一处（{@link #workspaceRoot()}）。
+   */
   @Bean
-  public PromptBuilder promptBuilder(ContextLoader contextLoader) {
-    return new PromptBuilder(contextLoader);
+  public LongTermMemoryStore longTermMemoryStore(
+      @Value("${memory.backend:markdown}") String backend,
+      MemoryEntryRepository memoryEntryRepository,
+      RestClient restClient,
+      @Value("${memory.mem0.base-url:}") String mem0BaseUrl,
+      @Value("${memory.mem0.user-id:fourfeetcat}") String mem0UserId) {
+    if (backend.isBlank()) {
+      // 空白视为"没配"（与 @Value 的缺省值同口径），它不是"一个未定义的取值"
+      return new MarkdownMemoryStore(workspaceRoot());
+    }
+    switch (backend) {
+      case BACKEND_SQLITE:
+        return new SqliteMemoryStore(memoryEntryRepository);
+      case BACKEND_MEM0:
+        if (mem0BaseUrl.isBlank()) {
+          throw new IllegalStateException(
+              "memory.backend=mem0 但 memory.mem0.base-url 未配置——应指向自托管的记忆服务地址");
+        }
+        return new Mem0MemoryStore(restClient.mutate().baseUrl(mem0BaseUrl).build(), mem0UserId);
+      case BACKEND_MARKDOWN:
+        return new MarkdownMemoryStore(workspaceRoot());
+      default:
+        throw new IllegalStateException(
+            "memory.backend 取值非法: " + backend + "（应为 markdown / sqlite / mem0）");
+    }
+  }
+
+  /** 记忆门面（第22节）：包住被选中的那一档——上层只认它，不认识底下是哪一档。 */
+  @Bean
+  public MemoryService memoryService(LongTermMemoryStore longTermMemoryStore) {
+    return new MemoryServiceImpl(longTermMemoryStore);
+  }
+
+  /** 组装器（第17节）：第22节起长期记忆段由门面供给——会话历史段仍由组装器自己负责，两段各注入一次。 */
+  @Bean
+  public PromptBuilder promptBuilder(ContextLoader contextLoader, MemoryService memoryService) {
+    return new PromptBuilder(contextLoader, memoryService);
   }
 
   /**
@@ -130,13 +188,16 @@ public class AgentRuntimeConfiguration {
       RestClient restClient,
       NotifyChannelAdapter notifyAdapter,
       NotifyChannelSource notifyChannels,
-      McpClientService mcpClientService) {
+      McpClientService mcpClientService,
+      MemoryService memoryService) {
     ToolRegistry registry = new ToolRegistry();
     registry.registerAnnotated(new FileTools(sandbox));
     registry.registerAnnotated(new ShellTools(sandbox, SHELL_TIMEOUT, SHELL_MAX_OUTPUT_CHARS));
     registry.registerAnnotated(new HttpTools(sandbox, restClient));
     // 第19节欠的那笔账在这里还上：推送能力从"契约 + 实现"变成 Agent 在对话里真的能调的工具
     registry.registerAnnotated(new NotifyTools(sandbox, notifyAdapter, notifyChannels));
+    // 第20节登记为跨节的两个工具在这里归位（save_memory / recall_memory）：只认门面，对底下是哪一档后端无感
+    registry.registerAnnotated(new MemoryTools(memoryService));
 
     // 外部工具服务（第20节）：启动时连接配置里声明的全部，把它暴露的工具也注册进来。
     // 连不上的只记 WARN 跳过——外部依赖失联不该拖垮底座自己的启动（连接范围与隔离见 McpClientService）。
