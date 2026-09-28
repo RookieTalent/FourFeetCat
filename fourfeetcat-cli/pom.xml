@@ -47,5 +47,12 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot</artifactId>
     </dependency>
+    <!-- 命令树回归测试（JUnit 5 + AssertJ）：本模块原先一个测试都没有，第20节那个"父命令字段类型写错 →
+         整棵命令树建不起来 → 打包产物所有命令全崩"的缺陷因此一路绿灯，补上这条最小的守点 -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 </project>
