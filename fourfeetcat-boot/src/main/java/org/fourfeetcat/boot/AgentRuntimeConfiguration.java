@@ -34,9 +34,13 @@ import org.fourfeetcat.tool.mcp.McpServerConfigLoader;
 import org.fourfeetcat.tool.notify.NotifyChannelAdapter;
 import org.fourfeetcat.tool.notify.NotifyTools;
 import org.fourfeetcat.tool.registry.ToolRegistry;
-import org.fourfeetcat.tool.sandbox.PermissiveSandbox;
+import org.fourfeetcat.tool.sandbox.FileSandboxProperties;
+import org.fourfeetcat.tool.sandbox.HttpSandboxProperties;
 import org.fourfeetcat.tool.sandbox.Sandbox;
+import org.fourfeetcat.tool.sandbox.ShellSandboxProperties;
+import org.fourfeetcat.tool.sandbox.WhitelistSandbox;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestClient;
@@ -46,11 +50,16 @@ import org.springframework.web.client.RestClient;
  *
  * <p>四个跨模块端口 Bean（{@code LlmCaller} / {@code LlmCallRecorder} / {@code ToolInvocationRecorder} /
  * {@code SessionManager}）全部复用既有实现——provider 模块的 {@code ProviderConfiguration} 与 storage 的两个
- * {@code @Component}。第20节再加四个：{@code Sandbox}（本节为临时装配）、{@code ToolRegistry}、 {@code
+ * {@code @Component}。第20节再加四个：{@code Sandbox}（第24节起为白名单实现）、{@code ToolRegistry}、 {@code
  * McpServerConfigLoader} 与 {@code McpClientService}。第22节再加两个：{@code LongTermMemoryStore}（按配置三选一）与
  * {@code MemoryService}（门面）。
  */
 @Configuration
+@EnableConfigurationProperties({
+  FileSandboxProperties.class,
+  ShellSandboxProperties.class,
+  HttpSandboxProperties.class
+})
 public class AgentRuntimeConfiguration {
 
   /** shell 单条命令的执行上限：课件没给数，取 30 秒这个工程默认值。 */
@@ -148,14 +157,20 @@ public class AgentRuntimeConfiguration {
   }
 
   /**
-   * 沙箱（第20节）。
+   * 沙箱（第20节立接口，第24节挂实现）：核心阶段挂应用层白名单那一档。
    *
-   * <p>⚠️ 这里挂的是**临时装配**：它不做任何校验，只为让沙箱节之前已注册的工具能跑通。规则本体归沙箱节，届时把这个 Bean 换成白名单实现即可——接口与调用方一行不改。见
-   * {@link PermissiveSandbox} 的类注释。
+   * <p>它替换的是第20节那个"什么都不拦"的临时装配——**接口签名、四个工具的调用位、审计路径一行未改**，只是换了个实现对象。第23节"接口设计对了，
+   * 接入成本会小到不成比例"这句话，兑现在这里。
+   *
+   * <p>三份白名单从配置读（{@code file.allowed_paths} / {@code shell.allowed_commands} / {@code
+   * http.allowed_domains}）；留空 = 什么都不允许。文件白名单项必须是绝对路径，否则启动即拒并点名该项。
    */
   @Bean
-  public Sandbox sandbox() {
-    return new PermissiveSandbox();
+  public Sandbox sandbox(
+      FileSandboxProperties fileProps,
+      ShellSandboxProperties shellProps,
+      HttpSandboxProperties httpProps) {
+    return new WhitelistSandbox(fileProps, shellProps, httpProps);
   }
 
   /** MCP 配置加载器（第20节）：读工作区里的 {@code mcp_servers.yaml}——工作区路径的口径只在 boot 里有一处。 */

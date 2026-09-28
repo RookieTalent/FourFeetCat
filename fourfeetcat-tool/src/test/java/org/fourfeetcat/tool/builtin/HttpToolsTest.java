@@ -16,8 +16,12 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import org.fourfeetcat.core.tool.CatTool;
 import org.fourfeetcat.tool.sandbox.ActionType;
+import org.fourfeetcat.tool.sandbox.FileSandboxProperties;
+import org.fourfeetcat.tool.sandbox.HttpSandboxProperties;
 import org.fourfeetcat.tool.sandbox.Sandbox;
 import org.fourfeetcat.tool.sandbox.SandboxViolationException;
+import org.fourfeetcat.tool.sandbox.ShellSandboxProperties;
+import org.fourfeetcat.tool.sandbox.WhitelistSandbox;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -88,6 +92,25 @@ class HttpToolsTest {
     // 拦在动手之前：接收端一个请求都没收到，才是真的没发出去
     assertThat(server.requests()).isEmpty();
     verify(sandbox).enforce(argThat(action -> action.type() == ActionType.HTTP_REQUEST));
+  }
+
+  @Test
+  @DisplayName("真白名单下越界域名_接收端一个请求都没收到")
+  void blockedDomain_withRealWhitelist_requestNeverLeaves() {
+    // 白名单里放的是域名，而接收端跑在 127.0.0.1 上——真校验会把它拦在请求发出之前
+    WhitelistSandbox sandbox =
+        new WhitelistSandbox(
+            new FileSandboxProperties(List.of()),
+            new ShellSandboxProperties(List.of()),
+            new HttpSandboxProperties(List.of("example.com")));
+    CatTool httpGet =
+        BuiltinToolTestSupport.tool(new HttpTools(sandbox, RestClient.create()), "http_get");
+
+    assertThatThrownBy(() -> httpGet.execute(BuiltinToolTestSupport.json("url", server.url())))
+        .isInstanceOf(SandboxViolationException.class)
+        .hasMessageContaining("域名不在白名单内: 127.0.0.1");
+
+    assertThat(server.requests()).isEmpty();
   }
 
   /** 本地假接收端：记收到的请求体、按设定返回响应（端口由系统分配，避免测试间抢端口）。 */

@@ -10,6 +10,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import java.util.LinkedHashMap;
@@ -23,7 +24,12 @@ import org.fourfeetcat.core.tool.ToolInvocationRecorder;
 import org.fourfeetcat.tool.registry.AnnotatedToolAdapter;
 import org.fourfeetcat.tool.registry.ToolRegistry;
 import org.fourfeetcat.tool.sandbox.ActionType;
+import org.fourfeetcat.tool.sandbox.FileSandboxProperties;
+import org.fourfeetcat.tool.sandbox.HttpSandboxProperties;
 import org.fourfeetcat.tool.sandbox.Sandbox;
+import org.fourfeetcat.tool.sandbox.SandboxViolationException;
+import org.fourfeetcat.tool.sandbox.ShellSandboxProperties;
+import org.fourfeetcat.tool.sandbox.WhitelistSandbox;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
@@ -91,6 +97,26 @@ class NotifyToolsTest {
     assertThatThrownBy(() -> tools.notify("你好", "no-such-channel"))
         .isInstanceOf(IllegalStateException.class)
         .hasMessageContaining("no-such-channel");
+  }
+
+  @Test
+  @DisplayName("真白名单下越界 webhook_发送端一次都没被调用")
+  void blockedWebhook_withRealWhitelist_neverSends() {
+    // 通知共用 http.allowed_domains 那一份白名单，不另造一套：越界的 webhook 域名在这里就该被拦
+    WhitelistSandbox real =
+        new WhitelistSandbox(
+            new FileSandboxProperties(List.of()),
+            new ShellSandboxProperties(List.of()),
+            new HttpSandboxProperties(List.of("example.com")));
+    NotifyTools tools =
+        new NotifyTools(
+            real, adapter, sourceOf(channel("ops", "webhook", "https://ops.example/hook")));
+
+    assertThatThrownBy(() -> tools.notify("日报", "ops"))
+        .isInstanceOf(SandboxViolationException.class)
+        .hasMessageContaining("域名不在白名单内: ops.example");
+
+    verify(adapter, never()).send(any(), anyString());
   }
 
   @Test
