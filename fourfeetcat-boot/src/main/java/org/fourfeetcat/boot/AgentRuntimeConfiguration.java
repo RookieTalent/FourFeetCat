@@ -16,6 +16,7 @@ import org.fourfeetcat.core.react.LlmCaller;
 import org.fourfeetcat.core.react.PromptBuilder;
 import org.fourfeetcat.core.react.ReActLoop;
 import org.fourfeetcat.core.react.ToolExecutor;
+import org.fourfeetcat.core.schedule.AgentScheduler;
 import org.fourfeetcat.core.session.SessionManager;
 import org.fourfeetcat.core.tool.ToolInvocationRecorder;
 import org.fourfeetcat.memory.LongTermMemoryStore;
@@ -43,6 +44,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.web.client.RestClient;
 
 /**
@@ -52,7 +54,8 @@ import org.springframework.web.client.RestClient;
  * {@code SessionManager}）全部复用既有实现——provider 模块的 {@code ProviderConfiguration} 与 storage 的两个
  * {@code @Component}。第20节再加四个：{@code Sandbox}（第24节起为白名单实现）、{@code ToolRegistry}、 {@code
  * McpServerConfigLoader} 与 {@code McpClientService}。第22节再加两个：{@code LongTermMemoryStore}（按配置三选一）与
- * {@code MemoryService}（门面）。
+ * {@code MemoryService}（门面）。第25节再加两个：{@code ThreadPoolTaskScheduler} 与 {@code AgentScheduler}（第三种
+ * 触发源；注册动作挂在该 Bean 的 {@code initMethod} 上）。
  */
 @Configuration
 @EnableConfigurationProperties({
@@ -73,6 +76,9 @@ public class AgentRuntimeConfiguration {
 
   private static final String BACKEND_SQLITE = "sqlite";
   private static final String BACKEND_MEM0 = "mem0";
+
+  /** 定时任务的调度线程数（第25节）：下限是 2，理由见 {@link #taskScheduler()}。 */
+  private static final int SCHEDULER_POOL_SIZE = 4;
 
   /** 工作区根：FOURFEETCAT_ROOT 可整体搬移（与 application.yaml 的数据源路径同口径）。 */
   static Path workspaceRoot() {
@@ -235,5 +241,34 @@ public class AgentRuntimeConfiguration {
   public AgentService agentService(
       ProfileRegistry profileRegistry, ReActLoop reActLoop, SessionManager sessionManager) {
     return new AgentService(profileRegistry, reActLoop, sessionManager);
+  }
+
+  /**
+   * 定时任务的调度线程池（第25节）。容量 **4**——**下限是 2**。
+   *
+   * <p>为什么不能是 1：触发型调度里同一条任务是"跑完才排下一次"，所以容量 1 不会让同一任务重叠；但它会让**不同**任务 互相排队——一条长任务（一次 ReAct
+   * 循环可能几分钟）会把别的任务到点的触发堵在池队列里，而"到点就跑"正是定时任务的 卖点。不设配置键：并发上界由配置里声明的任务条数决定，没有实测依据之前不引入调优旋钮。
+   */
+  @Bean
+  public ThreadPoolTaskScheduler taskScheduler() {
+    ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+    scheduler.setPoolSize(SCHEDULER_POOL_SIZE);
+    scheduler.setThreadNamePrefix("ffc-sched-");
+    return scheduler;
+  }
+
+  /**
+   * 第三种触发源（第25节）：容器起来时扫一遍所有 Agent 的定时配置，逐条注册进调度器。
+   *
+   * <p>注册动作挂在 {@code initMethod} 上而不是给 {@link AgentScheduler} 加 {@code @PostConstruct}：core 自第16节
+   * 起零 Spring 注解、装配一律在这里显式做，{@code initMethod} 也免了 core 去依赖注解 API。
+   */
+  @Bean(initMethod = "registerAll")
+  public AgentScheduler agentScheduler(
+      ThreadPoolTaskScheduler taskScheduler,
+      ProfileRegistry profileRegistry,
+      AgentService agentService,
+      SessionManager sessionManager) {
+    return new AgentScheduler(taskScheduler, profileRegistry, agentService, sessionManager);
   }
 }

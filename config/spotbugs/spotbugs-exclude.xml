@@ -101,6 +101,16 @@
     <Bug pattern="CRLF_INJECTION_LOGS"/>
   </Match>
 
+  <!-- CRLF_INJECTION_LOGS：第25节的调度器只把**Agent 配置里的**条目标识 / 触发规则 / 时区与 Agent 名拼进日志文案——
+       该文件由部署者自管，不是网络或对话用户可控的输入；与 profile 包、ContextLoader、McpClientService 同款理由。
+       sanitizing 会让"到底哪一条定时配置没注册上、哪一条跑挂了"这条唯一排障线索变模糊。
+       ⚠️ 复核提示：本类只把配置值写进日志**文案**，不把任何配置值拼进会话标识或工具入参（会话标识的拼接只在
+       SessionManager 实现内部一处）。若将来有人把配置值拿去拼标识 / 命令 / URL，本条排除就成了掩护——那时必须删掉它。 -->
+  <Match>
+    <Class name="org.fourfeetcat.core.schedule.AgentScheduler"/>
+    <Bug pattern="CRLF_INJECTION_LOGS"/>
+  </Match>
+
   <!-- THROWS_METHOD_THROWS_RUNTIMEEXCEPTION：CallbackTool.execute 刻意把 Spring AI 包装过的异常拆开重抛。
        不拆的话，沙箱拦截的原因会被埋进"调用方法失败"这类包装文案里，而审计表的失败原因是给人查事故用的。
        与 SpringAiProviderServiceImpl 的排除同因（精确重抛触发该 Low 级形态探测器，语义无变化）。 -->

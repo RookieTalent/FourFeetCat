@@ -26,6 +26,13 @@
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
     </dependency>
+    <!-- 第25节：定时调度直接用 Spring 的 TaskScheduler / CronTrigger 类型。同前一条的道理——它本就在编译期
+         classpath 上（经 spring-ai-model 传递），现显式声明，不把"core 真的用了它"藏进传递路径里。
+         版本由 Boot BOM 管，依赖集合无变化。 -->
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-context</artifactId>
+    </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
