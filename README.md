@@ -123,12 +123,17 @@ curl -X POST http://localhost:8080/api/v1/agents/my-agent/invoke \
   -d '{"message": "帮我查一下今天的天气"}'
 
 # 会话保持
-curl -X POST http://localhost:8080/api/v1/sessions
+curl -X POST http://localhost:8080/api/v1/sessions                    # 建会话
 curl -X POST http://localhost:8080/api/v1/sessions/<id>/messages \
-  -H "Content-Type: application/json" -d '{"message": "记住我偏好简洁回复"}'
+  -H "Content-Type: application/json" -d '{"message": "记住我偏好简洁回复"}'  # 发消息
+curl http://localhost:8080/api/v1/sessions                           # 列会话（最近活跃在前）
 ```
 
 完整 API 见 Swagger UI（`/swagger-ui`），核心 10 端点覆盖会话管理、Agent 调用、Profile / Memory / Tool 查询、健康检查。
+
+### 免 key 自检全链路（mock）
+
+不配任何 key 也能把"对话 → 记忆 → 工具 → 审计"整条链路走通：把 `fourfeetcat-boot/src/main/resources/application.yaml` 里 `fourfeetcat.providers` 下的 mock 示例取消注释（名字 `mock` 即装配脚本化 provider，不连真实模型），再让一个 Agent 的 `provider.name: mock`、`tools: [save_memory]`，即可命令行 / REST / 管理台三面同源验一遍——例如在其中发一句"记住：我喜欢喝美式咖啡"，`GET /api/v1/sessions`、`/api/v1/memory`、`/api/v1/tools` 里都能查到对应痕迹。
 
 ### Docker 部署
 

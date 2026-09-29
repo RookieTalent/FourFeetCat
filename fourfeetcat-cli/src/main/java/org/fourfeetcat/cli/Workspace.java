@@ -17,6 +17,7 @@ import java.nio.file.Path;
 final class Workspace {
 
   private static final String ROOT_ENV = "FOURFEETCAT_ROOT";
+  private static final String ROOT_PROP = "fourfeetcat.root";
   private static final String DEFAULT_ROOT = ".fourfeetcat";
   private static final String TEMPLATE_DIR = "/templates/";
   private static final String PROFILE_TEMPLATE = "profile.yaml";
@@ -39,7 +40,9 @@ final class Workspace {
   private Workspace() {}
 
   static Path root() {
-    return Path.of(System.getenv().getOrDefault(ROOT_ENV, DEFAULT_ROOT));
+    // `fourfeetcat.root` JVM 系统属性优先于环境变量（第27节新增，与 boot 装配同口径）：整机测试据此指到临时工作区
+    return Path.of(
+        System.getProperty(ROOT_PROP, System.getenv().getOrDefault(ROOT_ENV, DEFAULT_ROOT)));
   }
 
   static Path profilesDir() {

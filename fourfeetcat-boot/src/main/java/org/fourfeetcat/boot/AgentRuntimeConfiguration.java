@@ -80,9 +80,16 @@ public class AgentRuntimeConfiguration {
   /** 定时任务的调度线程数（第25节）：下限是 2，理由见 {@link #taskScheduler()}。 */
   private static final int SCHEDULER_POOL_SIZE = 4;
 
-  /** 工作区根：FOURFEETCAT_ROOT 可整体搬移（与 application.yaml 的数据源路径同口径）。 */
+  /**
+   * 工作区根：缺省 {@code .fourfeetcat}；FOURFEETCAT_ROOT 环境变量可整体搬移（与 application.yaml 的数据源路径同口径）。
+   *
+   * <p>第27节新增：`fourfeetcat.root` JVM 系统属性**优先**于环境变量——整机测试（MockAgentE2ETest）据此把工作区指到 临时目录，实现无 key
+   * 时全链路仍跑真实路径的 hermetic 隔离，无需污染真实工作区。
+   */
   static Path workspaceRoot() {
-    return Path.of(System.getenv().getOrDefault("FOURFEETCAT_ROOT", ".fourfeetcat"));
+    return Path.of(
+        System.getProperty(
+            "fourfeetcat.root", System.getenv().getOrDefault("FOURFEETCAT_ROOT", ".fourfeetcat")));
   }
 
   /** Profile 扫 {@code <root>/profiles/}；provider 名可解析性由全局层声明决定（课件第16节）。 */

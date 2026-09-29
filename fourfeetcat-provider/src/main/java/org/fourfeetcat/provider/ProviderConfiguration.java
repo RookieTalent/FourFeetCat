@@ -41,6 +41,13 @@ public class ProviderConfiguration {
   static final Duration MODEL_CALL_READ_TIMEOUT = Duration.ofSeconds(60);
 
   /**
+   * 免 key mock provider 的名字（第27节）：声明了这一名就装 {@link MockChatModel} 而不是 OpenAI 兼容模型。
+   *
+   * <p>挂在显式映射表的此名下（宪法原则三）：不连任何真实模型、不需要 key，是"全链路搬进 gate 而无 key"的那条自动化桩。
+   */
+  static final String MOCK_PROVIDER_NAME = "mock";
+
+  /**
    * 按给定读超时构造同步 HTTP 客户端。包内可见是为了让测试用短超时跑**同一条**构造路径——否则测试验的是另一套构造，等于没验。
    *
    * <p>用 Boot 的请求工厂构建器而非硬编码某个实现：当前类路径上只有 JDK HttpClient 可用，它会给出可辨识的超时异常；将来有人引入别的 客户端，只要超时仍然以"传输层失败
@@ -78,6 +85,14 @@ public class ProviderConfiguration {
     Map<String, ChatModel> providerMap = new HashMap<>();
     List<ProviderSpec> specs = properties.providers() == null ? List.of() : properties.providers();
     for (ProviderSpec spec : specs) {
+      if (MOCK_PROVIDER_NAME.equals(spec.name())) {
+        // 免 key 脚本化桩：没有 baseUrl / apiKey 可言，也不该去建 OpenAI 客户端
+        ChatModel previous = providerMap.put(spec.name(), new MockChatModel());
+        if (previous != null) {
+          throw new IllegalStateException("fourfeetcat.providers 里 provider 名重复: " + spec.name());
+        }
+        continue;
+      }
       OpenAiApi api =
           OpenAiApi.builder()
               .baseUrl(spec.baseUrl())

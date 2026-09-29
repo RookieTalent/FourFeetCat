@@ -59,6 +59,11 @@ fourfeetcat:
     - name: deepseek
       base-url: https://api.deepseek.com
       api-key: ${DEEPSEEK_API_KEY:}
+    # 免 key 验证全链路的 mock provider（第27节）：名字 "mock" 即装配 MockChatModel，不需要 key、不连真实模型。
+    # 无 key 想跑通全链路/管理台时取消下面三行注释（或在新环境里加同样一段）：
+    # - name: mock
+    #   base-url: https://mock.invalid
+    #   api-key:
 
 server:
   port: 8080
