@@ -8,6 +8,12 @@ website/.vitepress/*.log
 .oryxos/
 .fourfeetcat/
 
+# 管理台构建产物（第26节）：源码入库，产物由 mvn 构建产出，不入库
+fourfeetcat-web/src/main/resources/static/
+
+# 管理台前端构建工具链（第26节）：前端插件装的 Node，装一次长期复用，不入库
+fourfeetcat-web/.frontend-tools/
+
 # Maven
 target/
 *.class

@@ -6,7 +6,9 @@ public enum ErrorCode {
   BAD_REQUEST(400, "请求参数错误"),
   NOT_FOUND(404, "资源不存在"),
   INTERNAL_ERROR(500, "服务器内部错误"),
-  SERVICE_UNAVAILABLE(503, "服务暂不可用");
+  SERVICE_UNAVAILABLE(503, "服务暂不可用"),
+  /** 第26节新增：单次模型调用超过 60 秒上限——口径是**单次调用**，不是整轮处理。 */
+  REQUEST_TIMEOUT(504, "处理超时");
 
   private final int code;
   private final String reason;

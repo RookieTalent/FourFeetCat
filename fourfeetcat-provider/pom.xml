@@ -32,6 +32,12 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot</artifactId>
     </dependency>
+    <!-- 第26节：模型调用要显式给单次尝试的重试模板（不压重试，一次超时会被放大成数倍墙钟）。
+         此前靠 spring-ai-retry 传递可见，即本节起直接 import 它的类型，按第20节 jackson 先例显式声明。 -->
+    <dependency>
+      <groupId>org.springframework.retry</groupId>
+      <artifactId>spring-retry</artifactId>
+    </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>

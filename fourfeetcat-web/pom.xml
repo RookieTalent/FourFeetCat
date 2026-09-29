@@ -21,6 +21,17 @@
       <groupId>org.fourfeetcat</groupId>
       <artifactId>fourfeetcat-storage</artifactId>
     </dependency>
+    <!-- 能力域依赖（第26节）：/tools 要列**全部**已注册工具，而 core 的工具表端口只有"按名单取描述"，没有"列全部"。
+         为两个只读展示在 core 新造端口 = 给前序节契约面凭空加类型，方向反了；web 是叶子消费者，直接依赖叶子模块更直白。 -->
+    <dependency>
+      <groupId>org.fourfeetcat</groupId>
+      <artifactId>fourfeetcat-tool</artifactId>
+    </dependency>
+    <!-- 能力域依赖（第26节）：/info 要列全局 Provider 声明（该记录类型住在 provider 模块，本节只读它、绝不回显凭证内容） -->
+    <dependency>
+      <groupId>org.fourfeetcat</groupId>
+      <artifactId>fourfeetcat-provider</artifactId>
+    </dependency>
     <!-- HTTP 层：Spring MVC（宪法原则七：同步模型 + 虚拟线程，禁响应式） -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -40,5 +51,63 @@
       <groupId>org.springdoc</groupId>
       <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
     </dependency>
+    <!-- 测试（第26节）：本模块自本节起首次持有测试——切片测试（@WebMvcTest + MockMvc）验证端点薄度与错误映射 -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
+
+  <build>
+    <plugins>
+      <!-- 管理台前端（第26节）：把 npm 装依赖与构建绑进 Maven 生命周期，一条 mvn package 产出含管理台的完整产物。
+           代价：本模块每次构建都会跑一次前端构建，且首次需联网拉取固定版本的 Node 与依赖；离线模式（-o）跑不通本模块。 -->
+      <plugin>
+        <groupId>com.github.eirslett</groupId>
+        <artifactId>frontend-maven-plugin</artifactId>
+        <version>1.15.1</version>
+        <configuration>
+          <workingDirectory>src/main/frontend</workingDirectory>
+          <!-- 工具链装在 target/ **之外**：装一次长期复用，mvn clean 不必重新下载 Node（每次 clean 都重下既不必要、
+               在国内网络下还容易失败）。该目录不入库（见 .gitignore），换机器时首次构建自动下载。 -->
+          <installDirectory>${project.basedir}/.frontend-tools</installDirectory>
+        </configuration>
+        <executions>
+          <execution>
+            <id>install-node-and-npm</id>
+            <goals>
+              <goal>install-node-and-npm</goal>
+            </goals>
+            <phase>generate-resources</phase>
+            <configuration>
+              <!-- 版本写死：不用机器上碰巧装的那份，构建结果才可复现 -->
+              <nodeVersion>v24.18.0</nodeVersion>
+            </configuration>
+          </execution>
+          <execution>
+            <id>npm-ci</id>
+            <goals>
+              <goal>npm</goal>
+            </goals>
+            <phase>generate-resources</phase>
+            <configuration>
+              <!-- ci 而非 install：严格按锁文件装，锁文件与 package.json 不一致时直接失败 -->
+              <arguments>ci</arguments>
+            </configuration>
+          </execution>
+          <execution>
+            <id>npm-build</id>
+            <goals>
+              <goal>npm</goal>
+            </goals>
+            <phase>generate-resources</phase>
+            <configuration>
+              <arguments>run build</arguments>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
 </project>

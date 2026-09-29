@@ -2,6 +2,7 @@ package org.fourfeetcat.cli;
 
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.util.concurrent.CountDownLatch;
 import java.util.function.Function;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -62,6 +63,23 @@ public class FourFeetCatCli implements Runnable {
       startedEngine = engineFactory.apply(type);
     }
     return startedEngine;
+  }
+
+  /**
+   * 长驻命令的保活位：启动完引擎后**必须**调它，否则进程立刻退出。
+   *
+   * <p>为什么不能"起了容器就自然活着"：{@code main} 在命令行派发返回后无条件调 {@code System.exit}——命令方法一返回，进程就走。
+   * 于是"起了个服务"这件事会在几百毫秒后变成"服务停了"，而且退出码是 0（看起来一切正常，最坏的一种失败形态）。
+   *
+   * <p>放在根命令而不是各命令里各写一份：谁启动引擎、谁负责"启动完不要返回"，这两件事应当在同一处；分散写迟早会有一条新命令又忘了。 选 {@link
+   * CountDownLatch#await()} 而不是线程池或循环睡眠：同步阻塞、零额外线程（宪法原则七），进程退出钩子照常触发。
+   */
+  void awaitShutdown() {
+    try {
+      new CountDownLatch(1).await();
+    } catch (InterruptedException interrupted) {
+      Thread.currentThread().interrupt();
+    }
   }
 
   @Override

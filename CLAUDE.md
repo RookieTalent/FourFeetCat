@@ -336,13 +336,14 @@ interface CatTool {
 
 ## Web Service API
 
-核心阶段 10 个端点，统一前缀 `/api/v1`：
+核心阶段 11 个端点，统一前缀 `/api/v1`（第26节在原设计 10 个之上补了只读的会话列表）：
 
 | 方法 | 路径 | 说明 |
 |------|------|------|
 | `POST` | `/sessions` | 创建会话 |
 | `POST` | `/sessions/{id}/messages` | 发消息（触发 ReAct Loop） |
 | `GET` | `/sessions/{id}` | 查会话历史 |
+| `GET` | `/sessions` | 列全部会话（含归档，最近活跃在前；第26节新增） |
 | `DELETE` | `/sessions/{id}` | 归档会话 |
 | `POST` | `/agents/{name}/invoke` | 无状态调用 Agent |
 | `GET` | `/profiles` | 列所有 Profile |
@@ -447,6 +448,6 @@ provider:
 
 ## 官网（VitePress）与内容同步
 
-官网在 `website/`（VitePress 1.x，自主设计深色首页，非默认模板）：`npm run dev` 预览、`npm run build` 构建；中文站根 `/`、英文站 `/en/`，首页由 `website/.vitepress/theme/Home.vue` 整页渲染（frontmatter `home: true` 触发），双语文案在组件内 `t(zh, en)` 成对维护；图片在 `website/public/images/`（从 `docs/images/` 复制）。
+官网在 `website/`（VitePress 1.x，自主设计首页：明亮白底 + 蓝白猫色，非默认模板）：`npm run dev` 预览、`npm run build` 构建；中文站根 `/`、英文站 `/en/`，首页由 `website/.vitepress/theme/Home.vue` 整页渲染（frontmatter `home: true` 触发），双语文案在组件内 `t(zh, en)` 成对维护；图片在 `website/public/images/`（从 `docs/images/` 复制）。
 
 **改版内容须同步更新三处**：`README.md`、官网首页（`Home.vue` 双语）、`docs/` 设计文档——三者是同一事实的三个呈现，任何定位/特性/架构表述变更都要一起改，防止漂移。

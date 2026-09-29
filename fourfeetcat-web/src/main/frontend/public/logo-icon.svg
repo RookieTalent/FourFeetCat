@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <!-- ═══ 笑猫圆头 ═══
+       爪印去趾后，圆掌垫即猫脸——无耳、无眼，只留粉鼻 + ω 笑嘴，
+       正脸居中，一枚干净的蓝色笑猫圆头。
+       极简、favicon / 角标小尺寸依然清晰。 -->
+  <circle cx="100" cy="100" r="84" fill="#3D6FD6"/>
+  <ellipse cx="100" cy="104" rx="10" ry="7.5" fill="#F0A6B5"/>
+  <path d="M 100 116 Q 90 128 78 122 M 100 116 Q 110 128 122 122"
+        stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" fill="none"/>
+</svg>

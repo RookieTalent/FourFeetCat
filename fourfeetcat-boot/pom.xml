@@ -64,6 +64,21 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
       </plugin>
+      <!-- 集成冒烟（第26节）：WebSmokeIT 是唯一跑"真上下文 + 真 HTTP"的测试，必须真被执行。
+           Spring Boot 父 pom 只在 pluginManagement 里备好了 failsafe 的配置（includes **/*IT.java、版本号），
+           **不在这里声明插件它就永远不会跑**——实测踩过：`mvn verify` 日志里只有 *Test，冒烟测试等于没有。 -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
 </project>
