@@ -111,6 +111,14 @@
     <Bug pattern="CRLF_INJECTION_LOGS"/>
   </Match>
 
+  <!-- EI_EXPOSE_REP2：第28节的调度器构造注入协作者 ScheduledTaskStore（Spring Data-backed 的 JPA 实现）。
+       与 AgentService / SessionManager / ProfileRegistry / TaskScheduler 等既有协作者同因——被注入的是共享的
+       单例协作者接口，不可拷贝、也不该拷贝；构造注入是本仓既定的依赖注入形态，"防御性拷贝"在这里没有语义。 -->
+  <Match>
+    <Class name="org.fourfeetcat.core.schedule.AgentScheduler"/>
+    <Bug pattern="EI_EXPOSE_REP,EI_EXPOSE_REP2"/>
+  </Match>
+
   <!-- THROWS_METHOD_THROWS_RUNTIMEEXCEPTION：CallbackTool.execute 刻意把 Spring AI 包装过的异常拆开重抛。
        不拆的话，沙箱拦截的原因会被埋进"调用方法失败"这类包装文案里，而审计表的失败原因是给人查事故用的。
        与 SpringAiProviderServiceImpl 的排除同因（精确重抛触发该 Low 级形态探测器，语义无变化）。 -->
@@ -133,6 +141,14 @@
   </Match>
   <Match>
     <Class name="org.fourfeetcat.memory.Mem0MemoryStore"/>
+    <Bug pattern="EI_EXPOSE_REP,EI_EXPOSE_REP2"/>
+  </Match>
+
+  <!-- EI_EXPOSE_REP2：第28节的 ScheduleApiController 构造注入协作者 AgentScheduler（core 的调度器单例）。
+       与既有 Controller 注入 AgentService / SessionManager / 仓储同因——被注入的是共享的单例协作者，
+       不可拷贝、也不该拷贝；构造注入是 web 层既定的依赖注入形态。 -->
+  <Match>
+    <Class name="org.fourfeetcat.web.schedule.ScheduleApiController"/>
     <Bug pattern="EI_EXPOSE_REP,EI_EXPOSE_REP2"/>
   </Match>
 </FindBugsFilter>

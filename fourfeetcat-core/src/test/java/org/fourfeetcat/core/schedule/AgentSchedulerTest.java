@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -17,6 +19,7 @@ import java.time.ZonedDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
@@ -51,6 +54,7 @@ class AgentSchedulerTest {
   private ProfileRegistry profileRegistry;
   private AgentService agentService;
   private SessionManager sessionManager;
+  private ScheduledTaskStore store;
   private AgentScheduler scheduler;
 
   @BeforeEach
@@ -59,7 +63,32 @@ class AgentSchedulerTest {
     profileRegistry = mock(ProfileRegistry.class);
     agentService = mock(AgentService.class);
     sessionManager = mock(SessionManager.class);
-    scheduler = new AgentScheduler(taskScheduler, profileRegistry, agentService, sessionManager);
+    store = mock(ScheduledTaskStore.class);
+    scheduler =
+        new AgentScheduler(taskScheduler, profileRegistry, agentService, sessionManager, store);
+    // 默认"已登记且启用"：runOnce 先读登记、默认放行；针对停用/未登记的测试单独覆盖
+    when(store.findByProfileAndKey(any(), any()))
+        .thenAnswer(
+            invocation ->
+                Optional.of(
+                    new ScheduledTaskView(
+                        1L,
+                        invocation.getArgument(0),
+                        invocation.getArgument(1),
+                        null,
+                        "0 0 9 * * *",
+                        "Asia/Shanghai",
+                        MESSAGE,
+                        true,
+                        null,
+                        null,
+                        null,
+                        0L)));
+    // 钟推会话默认给一条真的：runTask 里 session.getId() 才能成立（mock 默认返 null 会空指针）
+    when(sessionManager.getOrCreate(eq("scheduler"), eq("scheduler"), eq(PROFILE_NAME)))
+        .thenReturn(
+            new Session(
+                "scheduler:scheduler:" + PROFILE_NAME, PROFILE_NAME, "scheduler", "scheduler"));
   }
 
   @Test
@@ -282,6 +311,97 @@ class AgentSchedulerTest {
     scheduler.runOnce(agent(), config("task-2"));
 
     verify(agentService, times(2)).process(any(), any());
+  }
+
+  @Test
+  @DisplayName("任务已停用_本次触发跳过_不执行也不记")
+  void disabledTask_skipsTriggerWithoutRunningOrRecording() {
+    when(store.findByProfileAndKey(any(), any()))
+        .thenReturn(
+            Optional.of(
+                new ScheduledTaskView(
+                    1L,
+                    PROFILE_NAME,
+                    "task-1",
+                    null,
+                    "0 0 9 * * *",
+                    "Asia/Shanghai",
+                    MESSAGE,
+                    false,
+                    null,
+                    null,
+                    null,
+                    0L)));
+
+    scheduler.runOnce(agent(), config("task-1"));
+
+    verify(agentService, never()).process(any(), any());
+    verify(store, never()).recordExecution(anyLong(), any(), anyBoolean(), any(), anyLong(), any());
+  }
+
+  @Test
+  @DisplayName("任务成功执行_记一条历史并把成功状态写回")
+  void taskRun_success_recordsExecution() {
+    when(agentService.process(any(), eq(MESSAGE))).thenReturn("到点了");
+
+    scheduler.runOnce(agent(), config("task-1"));
+
+    ArgumentCaptor<Long> scheduleId = ArgumentCaptor.forClass(Long.class);
+    ArgumentCaptor<String> sessionId = ArgumentCaptor.forClass(String.class);
+    ArgumentCaptor<Boolean> success = ArgumentCaptor.forClass(Boolean.class);
+    verify(store)
+        .recordExecution(
+            scheduleId.capture(), sessionId.capture(), success.capture(), any(), anyLong(), any());
+    assertThat(scheduleId.getValue()).isEqualTo(1L);
+    assertThat(sessionId.getValue()).isEqualTo("scheduler:scheduler:" + PROFILE_NAME);
+    assertThat(success.getValue()).isTrue();
+  }
+
+  @Test
+  @DisplayName("任务执行失败_记一条 failed 历史且原因是人话")
+  void taskRun_failure_recordsExecutionWithReadableCause() {
+    when(agentService.process(any(), eq(MESSAGE)))
+        .thenThrow(new IllegalStateException("域名不在白名单内: evil.com"));
+
+    scheduler.runOnce(agent(), config("task-1"));
+
+    ArgumentCaptor<Boolean> success = ArgumentCaptor.forClass(Boolean.class);
+    ArgumentCaptor<String> error = ArgumentCaptor.forClass(String.class);
+    verify(store)
+        .recordExecution(anyLong(), any(), success.capture(), error.capture(), anyLong(), any());
+    assertThat(success.getValue()).isFalse();
+    assertThat(error.getValue()).isEqualTo("域名不在白名单内: evil.com");
+  }
+
+  @Test
+  @DisplayName("runNow_无视启用状态_立即执行一次并记下成功历史")
+  void runNow_ignoresEnabledStateAndExecutes() {
+    ScheduledTaskView disabled =
+        new ScheduledTaskView(
+            7L,
+            PROFILE_NAME,
+            "task-7",
+            null,
+            "0 0 9 * * *",
+            "Asia/Shanghai",
+            MESSAGE,
+            false,
+            null,
+            null,
+            null,
+            0L);
+    when(store.findById(7L)).thenReturn(Optional.of(disabled));
+    when(profileRegistry.find(PROFILE_NAME)).thenReturn(Optional.of(agent()));
+    when(agentService.process(any(), eq(MESSAGE))).thenReturn("到点了");
+
+    assertThatCode(() -> scheduler.runNow(7L)).doesNotThrowAnyException();
+
+    // 停用的任务也能被手动触发
+    verify(agentService).process(any(), eq(MESSAGE));
+    ArgumentCaptor<Long> scheduleId = ArgumentCaptor.forClass(Long.class);
+    verify(store)
+        .recordExecution(scheduleId.capture(), any(), anyBoolean(), any(), anyLong(), any());
+    assertThat(scheduleId.getValue()).isEqualTo(7L);
   }
 
   /** "上次跑完"的触发上下文：三个时刻都设成同一个固定瞬间，下一次执行因此可复现。 */

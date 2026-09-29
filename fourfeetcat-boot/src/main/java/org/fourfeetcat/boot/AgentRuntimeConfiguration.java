@@ -17,6 +17,7 @@ import org.fourfeetcat.core.react.PromptBuilder;
 import org.fourfeetcat.core.react.ReActLoop;
 import org.fourfeetcat.core.react.ToolExecutor;
 import org.fourfeetcat.core.schedule.AgentScheduler;
+import org.fourfeetcat.core.schedule.ScheduledTaskStore;
 import org.fourfeetcat.core.session.SessionManager;
 import org.fourfeetcat.core.tool.ToolInvocationRecorder;
 import org.fourfeetcat.memory.LongTermMemoryStore;
@@ -265,17 +266,20 @@ public class AgentRuntimeConfiguration {
   }
 
   /**
-   * 第三种触发源（第25节）：容器起来时扫一遍所有 Agent 的定时配置，逐条注册进调度器。
+   * 第三种触发源（第25/28节）：容器起来时扫一遍所有 Agent 的定时配置，逐条登记进 scheduled_tasks 并注册进调度器。
    *
    * <p>注册动作挂在 {@code initMethod} 上而不是给 {@link AgentScheduler} 加 {@code @PostConstruct}：core 自第16节
-   * 起零 Spring 注解、装配一律在这里显式做，{@code initMethod} 也免了 core 去依赖注解 API。
+   * 起零 Spring 注解、装配一律在这里显式做，{@code initMethod} 也免了 core 去依赖注解 API。第28节起注入 {@link
+   * org.fourfeetcat.core.schedule.ScheduledTaskStore}——状态与历史落库，重启不丢。
    */
   @Bean(initMethod = "registerAll")
   public AgentScheduler agentScheduler(
       ThreadPoolTaskScheduler taskScheduler,
       ProfileRegistry profileRegistry,
       AgentService agentService,
-      SessionManager sessionManager) {
-    return new AgentScheduler(taskScheduler, profileRegistry, agentService, sessionManager);
+      SessionManager sessionManager,
+      ScheduledTaskStore scheduledTaskStore) {
+    return new AgentScheduler(
+        taskScheduler, profileRegistry, agentService, sessionManager, scheduledTaskStore);
   }
 }

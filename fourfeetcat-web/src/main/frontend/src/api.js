@@ -1,4 +1,4 @@
-// 管理台唯一的对外通道：只走 /api/v1 下已发布的只读 GET 端点。
+// 管理台唯一的对外通道：只走 /api/v1 下已发布的端点（读为主，第 28 节起定时任务页新增写操作）。
 // 它自己没有后端——某个页面调不动，说明端点设计缺了一块，该去补端点，而不是在这里绕开 API。
 
 const BASE = '/api/v1'
@@ -10,9 +10,25 @@ const BASE = '/api/v1'
  * 网络层失败（连不上、非 JSON）也收敛成一句可读的话，绝不把原始异常渲染到页面上。
  */
 export async function getJson(path) {
+  return requestJson(path, { method: 'GET' })
+}
+
+/**
+ * 调一个任意方法的端点（第 28 节起有写操作：立即执行 / 启用停用）。与 getJson 同信封、同错误口径。
+ * @param {string} path 端点路径（相对 /api/v1）
+ * @param {{method?: string, body?: object}} options
+ */
+export async function requestJson(path, { method = 'GET', body } = {}) {
   let response
   try {
-    response = await fetch(BASE + path, { headers: { Accept: 'application/json' } })
+    response = await fetch(BASE + path, {
+      method,
+      headers: {
+        Accept: 'application/json',
+        ...(body != null ? { 'Content-Type': 'application/json' } : {})
+      },
+      ...(body != null ? { body: JSON.stringify(body) } : {})
+    })
   } catch (cause) {
     throw new Error('连不上服务，请确认底座是否在运行')
   }

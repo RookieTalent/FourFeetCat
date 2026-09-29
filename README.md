@@ -127,9 +127,31 @@ curl -X POST http://localhost:8080/api/v1/sessions                    # 建会�
 curl -X POST http://localhost:8080/api/v1/sessions/<id>/messages \
   -H "Content-Type: application/json" -d '{"message": "记住我偏好简洁回复"}'  # 发消息
 curl http://localhost:8080/api/v1/sessions                           # 列会话（最近活跃在前）
+
+# 定时任务（第 28 节：能定义、能自己跑、记得住、能管理）
+curl http://localhost:8080/api/v1/schedules                           # 列定时任务与运行状态
+curl -X POST http://localhost:8080/api/v1/schedules/<id>/run          # 立即执行一次（无视启用状态）
+curl -X PUT http://localhost:8080/api/v1/schedules/<id> \
+  -H "Content-Type: application/json" -d '{"enabled": false}'         # 启用 / 停用
+curl http://localhost:8080/api/v1/schedules/<id>/executions           # 某任务的执行历史
 ```
 
-完整 API 见 Swagger UI（`/swagger-ui`），核心 10 端点覆盖会话管理、Agent 调用、Profile / Memory / Tool 查询、健康检查。
+完整 API 见 Swagger UI（`/swagger-ui`），核心端点覆盖会话管理、Agent 调用、Profile / Memory / Tool 查询、定时任务管理、健康检查。
+
+### Demo 前置（第 31 节两个 Agent 上场前）
+
+定时/天气链路能真跑，需先过沙箱白名单与通知渠道——**域名随实际部署渠道而定，这里只列清单不写死**：
+
+| # | 项 | 怎么配 |
+|---|----|--------|
+| ① | 天气域名进 http 白名单 | `application.yaml` 的 `http.allowed_domains` 加 `api.open-meteo.com`（Demo 一） |
+| ② | 通知渠道打点 | `notify_channels` 加 webhook/飞书/企微渠道（按实际渠道填域名，也进白名单） |
+| ③ | 新闻 MCP | `mcp_servers.yaml` 声明后 `fourfeetcat tool list` 能看到其工具 |
+| ④ | 记忆里有过往偏好 | 对话里说过"更关注 AI 和芯片" |
+| ⑤ | 定时配置 | cron 表达式 + 显式时区（如 `Asia/Shanghai`）核对过 |
+| ⑥ | 跨重启验证 | 重启后 `GET /api/v1/schedules` 仍列得出（状态/历史在 SQLite） |
+
+> 沙箱默认全部拒绝：notify 推送与 http_get 都得先过 `http.allowed_domains`，否则 31 节 Demo 全是 `tool_invocations` 里的 `success=false`。
 
 ### 免 key 自检全链路（mock）
 

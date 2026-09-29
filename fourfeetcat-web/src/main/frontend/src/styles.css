@@ -106,6 +106,24 @@ tbody tr:hover { background: var(--admin-bg-tint); }
 .status.archived::before { background: var(--admin-warn); }
 .status.ok::before { background: var(--admin-ok); }
 .status.missing::before { background: var(--admin-error); }
+/* 定时任务状态：启用=绿点，停用=黄点 */
+.status.enabled::before { background: var(--admin-ok); }
+.status.disabled::before { background: var(--admin-warn); }
+
+/* 定时任务页的写操作按钮（第 28 节起管理台开写） */
+.btn {
+  padding: 4px 12px;
+  margin-right: 6px;
+  border: 1px solid var(--admin-border);
+  border-radius: 6px;
+  background: var(--admin-card);
+  color: var(--admin-blue);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13px;
+}
+.btn:hover:not(:disabled) { border-color: var(--admin-blue); background: var(--admin-bg-tint); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
 /* 三态占位 */
 .state { padding: 22px 16px; color: var(--admin-muted); }
