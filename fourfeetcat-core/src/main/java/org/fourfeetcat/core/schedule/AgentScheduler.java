@@ -10,6 +10,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.fourfeetcat.core.profile.Profile;
@@ -62,6 +63,12 @@ public class AgentScheduler {
    */
   private final ConcurrentMap<String, Lock> taskLocks = new ConcurrentHashMap<>();
 
+  /**
+   * 已注册定时任务的执行句柄表（第29节，为 30 节注销/更新铺路），键 = {@code schedule id}（与 {@link #lockFor} 同口径的裸标识）。
+   * 每注册一条任务，在调用调度器之后将返回的 {@link ScheduledFuture} 以 id 存下；注销时据此 cancel。与 {@code taskLocks} 并存、各管其事。
+   */
+  private final Map<String, ScheduledFuture<?>> scheduledTasks = new ConcurrentHashMap<>();
+
   public AgentScheduler(
       TaskScheduler taskScheduler,
       ProfileRegistry profileRegistry,
@@ -86,15 +93,25 @@ public class AgentScheduler {
     Set<String> registeredIds = new HashSet<>();
     int registered = 0;
     for (Profile profile : profileRegistry.all()) {
-      registered += registerProfile(profile, registeredIds);
+      registered += doRegisterProfile(profile, registeredIds);
     }
     if (registered > 0 && log.isInfoEnabled()) {
       log.info("定时任务注册完成，共 {} 条", registered);
     }
   }
 
-  /** 注册一个 Agent 的全部定时任务；返回成功注册的条数。条目之间互不牵连：坏的那条跳过，其余照常。 */
-  private int registerProfile(Profile profile, Set<String> registeredIds) {
+  /**
+   * 注册一个 Agent 的全部定时任务；返回成功注册的条数。条目之间互不牵连：坏的那条跳过，其余照常。
+   *
+   * <p><b>第29节改造</b>：抽出公开入口供运行时新增 Agent（30 节 API 上传走同一段代码）。本方法每次另起一个独立 id 查重集 （不跨 Agent
+   * 查重）；启动全量扫描的跨 Agent id 查重仍由 {@link #registerAll} 经 {@link #doRegisterProfile} 完成。
+   * 每次成功注册都会把执行句柄存入 {@link #scheduledTasks}。
+   */
+  public int registerProfile(Profile profile) {
+    return doRegisterProfile(profile, new HashSet<>());
+  }
+
+  private int doRegisterProfile(Profile profile, Set<String> registeredIds) {
     int registered = 0;
     Set<String> activeKeys = new HashSet<>();
     for (int index = 0; index < profile.schedules().size(); index++) {
@@ -130,7 +147,11 @@ public class AgentScheduler {
               config.message(),
               nextRun(config.cron(), config.zone())));
       activeKeys.add(config.id());
-      taskScheduler.schedule(() -> runOnce(profile, config), trigger);
+      // 句柄非空才入表（真实调度器总返回句柄；防御 null——ConcurrentHashMap 禁止 null 值，且 mock 替身会返回 null）
+      ScheduledFuture<?> future = taskScheduler.schedule(() -> runOnce(profile, config), trigger);
+      if (future != null) {
+        scheduledTasks.put(config.id(), future);
+      }
       if (log.isInfoEnabled()) {
         log.info(
             "已注册定时任务 {}（Agent {}）：cron={} zone={}",
@@ -247,6 +268,11 @@ public class AgentScheduler {
         error,
         durationMs,
         nextRun(task.cron(), task.zone()));
+  }
+
+  /** 已注册任务的执行句柄表（包内可见：包内测试验"registerProfile 后 scheduledTasks 有句柄"；给外部调度 API 无正当用途）。 */
+  Map<String, ScheduledFuture<?>> scheduledTasksView() {
+    return scheduledTasks;
   }
 
   /** 取/建某个任务的执行权（包内可见：包内测试用它占住锁，构造"上一次还在跑"的场景；外部拿到锁没有正当用途）。 */

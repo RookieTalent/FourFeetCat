@@ -78,7 +78,9 @@ class AgentSchedulerWiringTest {
     @Bean
     @Primary
     ProfileRegistry stubProfileRegistry() {
-      return new ProfileRegistry(List.of(smokeAgent()));
+      ProfileRegistry registry = new ProfileRegistry();
+      registry.register(smokeAgent());
+      return registry;
     }
 
     private static Profile smokeAgent() {

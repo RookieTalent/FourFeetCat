@@ -2,12 +2,11 @@ package org.fourfeetcat.boot;
 
 import java.nio.file.Path;
 import java.time.Duration;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.fourfeetcat.core.memory.MemoryService;
 import org.fourfeetcat.core.notify.NotifyChannelSource;
-import org.fourfeetcat.core.profile.Profile;
+import org.fourfeetcat.core.profile.AgentLoader;
 import org.fourfeetcat.core.profile.ProfileLoader;
 import org.fourfeetcat.core.profile.ProfileRegistry;
 import org.fourfeetcat.core.react.AgentService;
@@ -93,16 +92,25 @@ public class AgentRuntimeConfiguration {
             "fourfeetcat.root", System.getenv().getOrDefault("FOURFEETCAT_ROOT", ".fourfeetcat")));
   }
 
-  /** Profile 扫 {@code <root>/profiles/}；provider 名可解析性由全局层声明决定（课件第16节）。 */
+  /**
+   * 两条 Profile 来源汇入同一注册表：手写 {@code <root>/profiles/*.yaml}（第16节）+ 插件式 {@code <root>/agents/<name>/}
+   * 目录派生（第29节，一个目录=一个Agent）。有 schedules 的派生 Agent 由 {@code AgentScheduler(initMethod=registerAll)}
+   * 自动收敛定时——这里只保证它们都进了 registry。
+   */
   @Bean
   public ProfileRegistry profileRegistry(ProviderConfiguration.ProviderProperties providers) {
     Set<String> knownProviders =
         providers.providers().stream()
             .map(ProviderConfiguration.ProviderSpec::name)
             .collect(Collectors.toSet());
-    List<Profile> loaded =
-        new ProfileLoader(knownProviders).load(workspaceRoot().resolve("profiles"));
-    return new ProfileRegistry(loaded);
+    ProfileRegistry registry = new ProfileRegistry();
+    new ProfileLoader(knownProviders)
+        .load(workspaceRoot().resolve("profiles"))
+        .forEach(registry::register);
+    new AgentLoader(knownProviders)
+        .scan(workspaceRoot().resolve("agents"))
+        .forEach(registry::register);
+    return registry;
   }
 
   /**

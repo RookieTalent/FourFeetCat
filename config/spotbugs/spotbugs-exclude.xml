@@ -151,4 +151,30 @@
     <Class name="org.fourfeetcat.web.schedule.ScheduleApiController"/>
     <Bug pattern="EI_EXPOSE_REP,EI_EXPOSE_REP2"/>
   </Match>
+
+  <!-- EI_EXPOSE_REP2：第29节的 AgentService 构造注入协作者 ProfileRegistry。第29节起该 registry 含运行时
+       register/remove（可变并发容器），成为"有语义可变状态"，触发 SpotBugs 的"存了外部可变对象"。
+       但被注入的是底座唯一的共享单例注册表（同 AgentScheduler / TaskScheduler / ScheduledTaskStore 协作者同因，
+       构造注入是本仓既定的依赖注入形态），"防御性拷贝"对一个共享容器没有语义——拷贝一份会丢运行时 register 的语义。 -->
+  <Match>
+    <Class name="org.fourfeetcat.core.react.AgentService"/>
+    <Bug pattern="EI_EXPOSE_REP,EI_EXPOSE_REP2"/>
+  </Match>
+
+  <!-- EI_EXPOSE_REP2：第29节起 ProfileRegistry 含运行时 register/remove（可变容器），web 层三个注入它的
+       Controller（Agent / Profile / Session）随之触发"存了外部可变对象"。与 AgentService 同因——被注入的是
+       底座唯一的共享单例注册表，构造注入是 web 层既定的依赖注入形态（同 ScheduleApiController 既有排除），
+       "防御性拷贝"对一个共享容器没有语义。 -->
+  <Match>
+    <Class name="org.fourfeetcat.web.agent.AgentApiController"/>
+    <Bug pattern="EI_EXPOSE_REP,EI_EXPOSE_REP2"/>
+  </Match>
+  <Match>
+    <Class name="org.fourfeetcat.web.profile.ProfileApiController"/>
+    <Bug pattern="EI_EXPOSE_REP,EI_EXPOSE_REP2"/>
+  </Match>
+  <Match>
+    <Class name="org.fourfeetcat.web.session.SessionApiController"/>
+    <Bug pattern="EI_EXPOSE_REP,EI_EXPOSE_REP2"/>
+  </Match>
 </FindBugsFilter>

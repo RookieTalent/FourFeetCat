@@ -67,12 +67,7 @@ public class ProfileLoader {
       if (!(raw instanceof Map)) {
         throw new IllegalArgumentException("YAML 根节点必须是映射结构");
       }
-      Profile profile = toProfile(file, resolveEnvPlaceholders((Map<String, Object>) raw));
-      if (!knownProviders.contains(profile.provider().name())) {
-        throw new IllegalArgumentException(
-            "provider 名 '" + profile.provider().name() + "' 未在全局配置 fourfeetcat.providers 里声明");
-      }
-      return profile;
+      return fromYamlMap(file, (Map<String, Object>) raw);
     } catch (IOException | RuntimeException e) {
       // 坏 Profile 记错误日志、不阻断启动（课件口径）；任何一种解析/校验失败都收敛到跳过
       if (log.isErrorEnabled()) {
@@ -80,6 +75,19 @@ public class ProfileLoader {
       }
       return null;
     }
+  }
+
+  /**
+   * 把一份已解析的配置 Map 派生成 Profile 并做 provider 名可解析校验（第29节：AgentLoader 派生 AGENT.md frontmatter 复用同一段
+   * 映射与校验，保证"目录派生的 Agent 与手写 Profile 走同一套校验"——同异常类型、同消息）。包内可见。
+   */
+  Profile fromYamlMap(Path origin, Map<String, Object> raw) {
+    Profile profile = toProfile(origin, resolveEnvPlaceholders(raw));
+    if (!knownProviders.contains(profile.provider().name())) {
+      throw new IllegalArgumentException(
+          "provider 名 '" + profile.provider().name() + "' 未在全局配置 fourfeetcat.providers 里声明");
+    }
+    return profile;
   }
 
   /** ${ENV} 占位解析：递归替换标量值；占位对应变量缺失视为校验问题（不静默当空串跑过去）。 */
